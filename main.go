@@ -13,15 +13,15 @@ import (
 )
 
 type CameraConf struct {
-  Id string `json:"id"`
-  User string `json:"user"`
-  Pass string `json:"pass"`
+	Id   string `json:"id"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
 }
 
 type Config struct {
-	AppId string `json:"app_id"`
-  AppHash string `json:"app_hash"`
-  Cameras []CameraConf `json:"cameras"`
+	AppHash string       `json:"app_hash"`
+	Cameras []CameraConf `json:"cameras"`
+	AppId   int          `json:"app_id"`
 }
 
 func main() {
@@ -29,7 +29,7 @@ func main() {
 	appHash := os.Getenv("APP_HASH")
 
 	myConf := Config{}
-  bytes := []byte(`{ "app_id": "some string id", "app_hash": "some hash string", "cameras": [{ "user": "admin", "pass": "password", "id": "bedroom"}]}`)
+	bytes := []byte(`{ "app_id": 293847, "app_hash": "some hash string", "cameras": [{ "user": "admin", "pass": "password", "id": "bedroom"}]}`)
 	err := json.Unmarshal(bytes, &myConf)
 	if err != nil {
 		log.Fatal(err)
