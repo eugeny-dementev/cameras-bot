@@ -6,8 +6,10 @@ import "C"
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
+	"path"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -25,15 +27,23 @@ type Config struct {
 }
 
 func main() {
-	appId := os.Getenv("APP_ID")
-	appHash := os.Getenv("APP_HASH")
-
-	myConf := Config{}
-	bytes := []byte(`{ "app_id": 293847, "app_hash": "some hash string", "cameras": [{ "user": "admin", "pass": "password", "id": "bedroom"}]}`)
-	err := json.Unmarshal(bytes, &myConf)
+	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("ENV:", appId, appHash, myConf)
+	configDir := path.Join(userHomeDir, ".config/cameras-bot")
+	fileSystem := os.DirFS(configDir)
+	jsonBytes, err := fs.ReadFile(fileSystem, "config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	myConf := Config{}
+	err = json.Unmarshal(jsonBytes, &myConf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("CONFIG:", myConf)
 }
