@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path"
+  tg "github.com/amarnathcjd/gogram/telegram"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -39,11 +40,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	myConf := Config{}
-	err = json.Unmarshal(jsonBytes, &myConf)
+	conf := Config{}
+	err = json.Unmarshal(jsonBytes, &conf)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println("CONFIG:", myConf)
+  sessionFilePath := path.Join(configDir, "session")
+	mtproto, _ := tg.NewClient(tg.ClientConfig{
+		AppID:   int32(conf.AppId),
+		AppHash: conf.AppHash,
+		Session: sessionFilePath,
+	})
+	err = mtproto.Start()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("CONFIG:", conf)
+
+  mtproto.Idle()
 }
