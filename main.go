@@ -10,7 +10,8 @@ import (
 	"log"
 	"os"
 	"path"
-  tg "github.com/amarnathcjd/gogram/telegram"
+
+	tg "github.com/amarnathcjd/gogram/telegram"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -19,6 +20,8 @@ type CameraConf struct {
 	Id   string `json:"id"`
 	User string `json:"user"`
 	Pass string `json:"pass"`
+	Ip   string `json:"ip"`
+	Port string `json:"port"`
 }
 
 type Config struct {
@@ -46,7 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-  sessionFilePath := path.Join(configDir, "session")
+	sessionFilePath := path.Join(configDir, "session")
 	mtproto, _ := tg.NewClient(tg.ClientConfig{
 		AppID:   int32(conf.AppId),
 		AppHash: conf.AppHash,
@@ -59,5 +62,5 @@ func main() {
 
 	fmt.Println("CONFIG:", conf)
 
-  mtproto.Idle()
+	mtproto.Idle()
 }
