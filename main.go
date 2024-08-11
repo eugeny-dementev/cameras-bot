@@ -27,6 +27,10 @@ type Config struct {
 	AppId   int          `json:"app_id"`
 }
 
+func (c Config) String () string {
+  return fmt.Sprintf("AppHash: %v, Cameras: %v", len(c.AppHash), c.Cameras)
+}
+
 func main() {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
