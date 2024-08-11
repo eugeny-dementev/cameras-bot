@@ -17,11 +17,8 @@ import (
 )
 
 type CameraConf struct {
-	Id   string `json:"id"`
-	User string `json:"user"`
-	Pass string `json:"pass"`
-	Ip   string `json:"ip"`
-	Port string `json:"port"`
+	Id    string `json:"id"`
+	Input string `json:"input"`
 }
 
 type Config struct {
