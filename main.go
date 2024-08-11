@@ -21,6 +21,10 @@ type CameraConf struct {
 	Input string `json:"input"`
 }
 
+func (c CameraConf) String () string {
+  return fmt.Sprintf("Id: %v", c.Id)
+}
+
 type Config struct {
 	AppHash string       `json:"app_hash"`
 	Cameras []CameraConf `json:"cameras"`
