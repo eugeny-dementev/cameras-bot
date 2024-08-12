@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net/url"
 	"os"
 	"path"
+	"regexp"
 
 	tg "github.com/amarnathcjd/gogram/telegram"
 
@@ -21,8 +23,18 @@ type CameraConf struct {
 	Input string `json:"input"`
 }
 
-func (c CameraConf) String () string {
-  return fmt.Sprintf("Id: %v", c.Id)
+func (c CameraConf) String() string {
+	parsedUrl, err := url.Parse(c.Input)
+	if err != nil {
+		log.Panic("cannot parse provided input URL", err)
+	}
+
+	re := regexp.MustCompile("[a-f0-9]")
+
+	parsedUrl.User = url.UserPassword("root", "root")
+	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
+
+	return fmt.Sprintf("Id: %v, URL: %v", c.Id, parsedUrl)
 }
 
 type Config struct {
@@ -31,8 +43,8 @@ type Config struct {
 	AppId   int          `json:"app_id"`
 }
 
-func (c Config) String () string {
-  return fmt.Sprintf("AppHash: %v, Cameras: %v", len(c.AppHash), c.Cameras)
+func (c Config) String() string {
+	return fmt.Sprintf("AppHash: %v, Cameras: %v", len(c.AppHash), c.Cameras)
 }
 
 func main() {
