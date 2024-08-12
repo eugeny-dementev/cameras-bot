@@ -34,7 +34,7 @@ func (c CameraConf) String() string {
 	parsedUrl.User = url.UserPassword("root", "root")
 	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
 
-	return fmt.Sprintf("Id: %v, URL: %v", c.Id, parsedUrl)
+	return fmt.Sprintf("{Id: %v, URL: %v}", c.Id, parsedUrl)
 }
 
 type Config struct {
