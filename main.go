@@ -19,6 +19,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -110,7 +111,7 @@ func main() {
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
 	// /source command to send the bot source code
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
-
+	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
 	// Start receiving updates.
 	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
@@ -169,29 +170,38 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 func start(bot *gotgbot.Bot, ctx *ext.Context) error {
 	_, err := ctx.EffectiveMessage.Reply(bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", bot.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
+		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
+			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
+				{Text: "Press me", CallbackData: "start_callback"},
+			}},
+		},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
-
-	button, err := bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
-	if err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	} else {
-		fmt.Println("button", button)
-	}
-
-	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonDefault{}, ChatId: &ctx.EffectiveSender.ChatId})
 	if !success || err != nil {
 		log.Fatal("failed to set chat menu button", err)
-	}
-
-	button, err = bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
-	if err != nil {
-		log.Fatal("failed to set chat menu button", err)
 	} else {
-		fmt.Println("button", button)
+		log.Println("success:", success)
 	}
 
+	return nil
+}
+
+func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
+	cb := ctx.Update.CallbackQuery
+
+	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
+		Text: "You pressed a button!",
+	})
+	if err != nil {
+		return fmt.Errorf("failed to answer start callback query: %w", err)
+	}
+
+	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
+	if err != nil {
+		return fmt.Errorf("failed to edit start message text: %w", err)
+	}
 	return nil
 }
