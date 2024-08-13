@@ -66,6 +66,8 @@ func main() {
 		log.Fatal(err)
 	}
 
+	fmt.Println("CONFIG:", conf)
+
 	sessionFilePath := path.Join(configDir, "session")
 	mtproto, _ := tg.NewClient(tg.ClientConfig{
 		AppID:   int32(conf.AppId),
