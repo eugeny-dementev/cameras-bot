@@ -90,9 +90,28 @@ func main() {
 	}
 
 	// Create bot from environment value.
-	b, err := gotgbot.NewBot(botToken, nil)
+	bot, err := gotgbot.NewBot(botToken, nil)
 	if err != nil {
 		panic("failed to create new bot: " + err.Error())
+	}
+
+	button, err := bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
+	if err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		fmt.Println("button", button)
+	}
+
+	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	if !success || err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	}
+
+	button, err = bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
+	if err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		fmt.Println("button", button)
 	}
 
 	// Create updater and dispatcher.
@@ -112,7 +131,7 @@ func main() {
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
 
 	// Start receiving updates.
-	err = updater.StartPolling(b, &ext.PollingOpts{
+	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
 			Timeout: 9,
@@ -124,7 +143,7 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", b.User.Username)
+	log.Printf("%s has been started...\n", bot.User.Username)
 
 	mtproto.Idle()
 	updater.Idle()
