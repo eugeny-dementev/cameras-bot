@@ -95,25 +95,6 @@ func main() {
 		panic("failed to create new bot: " + err.Error())
 	}
 
-	button, err := bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
-	if err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	} else {
-		fmt.Println("button", button)
-	}
-
-	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
-	if !success || err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	}
-
-	button, err = bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
-	if err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	} else {
-		fmt.Println("button", button)
-	}
-
 	// Create updater and dispatcher.
 	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
 		// If an error is returned by a handler, log it and continue going.
@@ -185,12 +166,32 @@ func source(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 // start introduces the bot.
-func start(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", b.User.Username), &gotgbot.SendMessageOpts{
+func start(bot *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := ctx.EffectiveMessage.Reply(bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", bot.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
 	})
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
+
+	button, err := bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
+	if err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		fmt.Println("button", button)
+	}
+
+	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	if !success || err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	}
+
+	button, err = bot.GetChatMenuButton(&gotgbot.GetChatMenuButtonOpts{})
+	if err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		fmt.Println("button", button)
+	}
+
 	return nil
 }
