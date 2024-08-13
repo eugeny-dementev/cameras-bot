@@ -20,6 +20,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -106,6 +107,9 @@ func main() {
 		MaxRoutines: ext.DefaultMaxRoutines,
 	})
 	updater := ext.NewUpdater(dispatcher, nil)
+
+	// Add echo handler to reply to all text messages.
+	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
 
 	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
@@ -202,6 +206,14 @@ func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
 	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
 	if err != nil {
 		return fmt.Errorf("failed to edit start message text: %w", err)
+	}
+	return nil
+}
+
+func echo(b *gotgbot.Bot, ctx *ext.Context) error {
+	_, err := ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
+	if err != nil {
+		return fmt.Errorf("failed to echo message: %w", err)
 	}
 	return nil
 }
