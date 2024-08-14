@@ -108,14 +108,16 @@ func main() {
 	})
 	updater := ext.NewUpdater(dispatcher, nil)
 
-	// Add echo handler to reply to all text messages.
-	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
-
 	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
+
 	// /source command to send the bot source code
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
+
+	// Add echo handler to reply to all text messages.
+	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
+
 	// Start receiving updates.
 	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
@@ -183,7 +185,8 @@ func start(bot *gotgbot.Bot, ctx *ext.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
-	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonDefault{}, ChatId: &ctx.EffectiveSender.ChatId})
+
+	success, err := ctx.Message.Chat.SetMenuButton(bot, &gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonDefault{}, ChatId: &ctx.EffectiveSender.ChatId})
 	if !success || err != nil {
 		log.Fatal("failed to set chat menu button", err)
 	} else {
