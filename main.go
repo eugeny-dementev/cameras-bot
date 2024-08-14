@@ -131,7 +131,14 @@ func main() {
 	if err != nil {
 		panic("failed to start polling: " + err.Error())
 	}
-	log.Printf("%s has been started...\n", bot.User.Username)
+	log.Printf("%s has been started...\n", bot.Username)
+
+  success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	if !success || err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		log.Println("success:", success)
+	}
 
 	mtproto.Idle()
 	updater.Idle()
@@ -186,7 +193,7 @@ func start(bot *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
 
-	success, err := ctx.Message.Chat.SetMenuButton(bot, &gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonDefault{}, ChatId: &ctx.EffectiveSender.ChatId})
+	success, err := ctx.Message.Chat.SetMenuButton(bot, &gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
 	if !success || err != nil {
 		log.Fatal("failed to set chat menu button", err)
 	} else {
