@@ -230,7 +230,12 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func commandRunLog(ctx *ext.Context, message string) {
+func about(bot *gotgbot.Bot, ctx *ext.Context) error {
+  commandRunLog(ctx, "/about", "Started command")
+
+
+	return nil
+}
 
 func commandRunLog(ctx *ext.Context, commandName, message string) {
 	chatId := ctx.Message.Chat.Id
