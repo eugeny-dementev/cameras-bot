@@ -142,7 +142,7 @@ func main() {
 	if !success || err != nil {
 		log.Fatal("failed to set chat menu button", err)
 	} else {
-		log.Println("success:", success)
+		log.Println("set MenuButtonCommands for all chats:", success)
 	}
 
 	mtproto.Idle()
