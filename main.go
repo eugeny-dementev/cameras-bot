@@ -231,12 +231,9 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func commandRunLog(ctx *ext.Context, message string) {
+
+func commandRunLog(ctx *ext.Context, commandName, message string) {
 	chatId := ctx.Message.Chat.Id
   username := ctx.Message.From.Username
-  log.Printf("[/about][ChatId:%v][User:%v]", chatId, username)
-  if message == "" {
-    log.Printf("\n")
-  } else {
-    log.Printf(" - %v\n", message)
-  }
+  log.Printf("[%v][ChatId:%v][User:%v] - %v\n", commandName, chatId, username, message)
 }
