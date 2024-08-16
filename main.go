@@ -113,6 +113,9 @@ func main() {
 	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", start))
 
+	// /about command to provide info about bot and what it can
+	dispatcher.AddHandler(handlers.NewCommand("about", about))
+
 	// /source command to send the bot source code
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
 	dispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal("start_callback"), startCB))
