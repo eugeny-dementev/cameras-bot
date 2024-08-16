@@ -26,7 +26,8 @@ import (
 )
 
 type CameraConf struct {
-	Id    string `json:"id"`
+	Tag   string `json:"tag"`
+	Name  string `json:"name"`
 	Input string `json:"input"`
 }
 
@@ -41,7 +42,7 @@ func (c CameraConf) String() string {
 	parsedUrl.User = url.UserPassword("root", "root")
 	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
 
-	return fmt.Sprintf("{Id: %v, URL: %v}", c.Id, parsedUrl)
+  return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
 }
 
 type Config struct {
@@ -133,7 +134,7 @@ func main() {
 	}
 	log.Printf("%s has been started...\n", bot.Username)
 
-  success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
 	if !success || err != nil {
 		log.Fatal("failed to set chat menu button", err)
 	} else {
