@@ -42,13 +42,14 @@ func (c CameraConf) String() string {
 	parsedUrl.User = url.UserPassword("root", "root")
 	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
 
-  return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
+	return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
 }
 
 type Config struct {
-	AppHash string       `json:"app_hash"`
-	Cameras []CameraConf `json:"cameras"`
-	AppId   int          `json:"app_id"`
+	AppHash  string       `json:"app_hash"`
+	BotToken string       `json:"bot_token"`
+	Cameras  []CameraConf `json:"cameras"`
+	AppId    int          `json:"app_id"`
 }
 
 func (c Config) String() string {
@@ -87,7 +88,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Get botToken from the environment variable
-	botToken := os.Getenv("BOT_TOKEN")
+	botToken := conf.BotToken
 	if botToken == "" {
 		panic("TOKEN environment variable is empty")
 	}
