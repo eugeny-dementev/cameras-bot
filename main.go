@@ -234,14 +234,22 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 }
 
 func about(bot *gotgbot.Bot, ctx *ext.Context) error {
-  commandRunLog(ctx, "/about", "Started command")
+	commandRunLog(ctx, "/about", "Started command")
 
+	_, err := ctx.EffectiveMessage.Reply(
+		bot,
+		"Telegram bot to configure and start streaming from IP cameras through video call",
+		&gotgbot.SendMessageOpts{DisableNotification: true},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to echo message: %w", err)
+	}
 
 	return nil
 }
 
 func commandRunLog(ctx *ext.Context, commandName, message string) {
 	chatId := ctx.Message.Chat.Id
-  username := ctx.Message.From.Username
-  log.Printf("[%v][ChatId:%v][User:%v] - %v\n", commandName, chatId, username, message)
+	username := ctx.Message.From.Username
+	log.Printf("[%v][ChatId:%v][User:%v] - %v\n", commandName, chatId, username, message)
 }
