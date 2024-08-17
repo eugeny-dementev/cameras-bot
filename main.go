@@ -60,10 +60,11 @@ type Config struct {
 	Cameras     []CameraConf        `json:"cameras"`
 	Permissions []CameraPermissions `json:"permissions"`
 	AppId       int                 `json:"app_id"`
+	AdminId     int64               `json:"admin_id"`
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("AppHash: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.Cameras, c.Permissions)
+	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
 func main() {
