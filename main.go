@@ -45,11 +45,21 @@ func (c CameraConf) String() string {
 	return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
 }
 
+type CameraPermissions struct {
+	Tags   []string `json:"tags"`
+	UserId int64    `json:"user_id"`
+}
+
+func (p CameraPermissions) String() string {
+	return fmt.Sprintf("{UserId: %v, Tags: %v}", p.UserId, p.Tags)
+}
+
 type Config struct {
-	AppHash  string       `json:"app_hash"`
-	BotToken string       `json:"bot_token"`
-	Cameras  []CameraConf `json:"cameras"`
-	AppId    int          `json:"app_id"`
+	AppHash     string              `json:"app_hash"`
+	BotToken    string              `json:"bot_token"`
+	Cameras     []CameraConf        `json:"cameras"`
+	Permissions []CameraPermissions `json:"permissions"`
+	AppId       int                 `json:"app_id"`
 }
 
 func (c Config) String() string {
@@ -251,5 +261,6 @@ func about(bot *gotgbot.Bot, ctx *ext.Context) error {
 func commandRunLog(ctx *ext.Context, commandName, message string) {
 	chatId := ctx.Message.Chat.Id
 	username := ctx.Message.From.Username
+	// userId := ctx.Message.From.Id
 	log.Printf("[%v][ChatId:%v][User:%v] - %v\n", commandName, chatId, username, message)
 }
