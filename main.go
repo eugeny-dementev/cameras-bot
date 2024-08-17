@@ -67,25 +67,9 @@ func (c Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
+const conf = getConfig()
+
 func main() {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	configDir := path.Join(userHomeDir, ".config/cameras-bot")
-	fileSystem := os.DirFS(configDir)
-	jsonBytes, err := fs.ReadFile(fileSystem, "config.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	conf := Config{}
-	err = json.Unmarshal(jsonBytes, &conf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	fmt.Println("CONFIG:", conf)
 
 	sessionFilePath := path.Join(configDir, "session")
@@ -266,4 +250,26 @@ func commandRunLog(ctx *ext.Context, commandName, message string) {
 	username := ctx.Message.From.Username
 	// userId := ctx.Message.From.Id
 	log.Printf("[%v][ChatId:%v][User:%v] - %v\n", commandName, chatId, username, message)
+}
+
+func getConfig() Config {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	configDir := path.Join(userHomeDir, ".config/cameras-bot")
+	fileSystem := os.DirFS(configDir)
+	jsonBytes, err := fs.ReadFile(fileSystem, "config.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	conf := Config{}
+	err = json.Unmarshal(jsonBytes, &conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return conf
 }
