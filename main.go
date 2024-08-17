@@ -247,6 +247,20 @@ func about(bot *gotgbot.Bot, ctx *ext.Context) error {
 		return fmt.Errorf("failed to echo message: %w", err)
 	}
 
+	if ctx.EffectiveSender.ChatId == conf.AdminId {
+    perms := getPermissions(conf.AdminId, conf.Permissions)
+		_, err := ctx.EffectiveChat.SendMessage(
+			bot,
+			fmt.Sprintf("Available cameras: %v", perms.Tags),
+			&gotgbot.SendMessageOpts{
+				DisableNotification: true,
+			},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to echo message: %w", err)
+		}
+	}
+
 	return nil
 }
 
