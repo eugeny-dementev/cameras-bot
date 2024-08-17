@@ -247,10 +247,12 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 func about(bot *gotgbot.Bot, ctx *ext.Context) error {
 	commandRunLog(ctx, "/about", "Started command")
 
-	_, err := ctx.EffectiveMessage.Reply(
+	_, err := ctx.EffectiveChat.SendMessage(
 		bot,
-		"Telegram bot to configure and start streaming from IP cameras through video call",
-		&gotgbot.SendMessageOpts{DisableNotification: true},
+		"Bot to stream video from IP security cameras",
+		&gotgbot.SendMessageOpts{
+			DisableNotification: true,
+		},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to echo message: %w", err)
