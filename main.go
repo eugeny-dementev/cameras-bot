@@ -67,11 +67,16 @@ func (c Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
-const conf = getConfig()
+var conf = getConfig()
 
 func main() {
 	fmt.Println("CONFIG:", conf)
 
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	configDir := path.Join(userHomeDir, ".config/cameras-bot")
 	sessionFilePath := path.Join(configDir, "session")
 	mtproto, _ := tg.NewClient(tg.ClientConfig{
 		AppID:   int32(conf.AppId),
