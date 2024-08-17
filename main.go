@@ -63,7 +63,7 @@ type Config struct {
 }
 
 func (c Config) String() string {
-	return fmt.Sprintf("AppHash: %v, Cameras: %v", len(c.AppHash), c.Cameras)
+	return fmt.Sprintf("AppHash: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.Cameras, c.Permissions)
 }
 
 func main() {
