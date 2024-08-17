@@ -278,3 +278,13 @@ func getConfig() Config {
 
 	return conf
 }
+
+func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermissions {
+  for _, perm := range permissions {
+    if perm.UserId == userId {
+      return &perm
+    }
+  }
+
+  return nil
+}
