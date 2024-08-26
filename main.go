@@ -67,6 +67,16 @@ func (c Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
+func (c Config) GetPermissionsFor(userId int64) *CameraPermissions {
+  for _, perm := range c.Permissions {
+    if perm.UserId == userId {
+      return &perm
+    }
+  }
+
+  return nil
+}
+
 var conf = getConfig()
 
 func main() {
