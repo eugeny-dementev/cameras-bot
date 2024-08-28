@@ -8,11 +8,14 @@ import (
 	"fmt"
 	"io/fs"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"path"
 	"regexp"
 	"time"
+
+"github.com/icholy/digest"
 
 	tg "github.com/amarnathcjd/gogram/telegram"
 
@@ -26,13 +29,14 @@ import (
 )
 
 type CameraConf struct {
-	Tag   string `json:"tag"`
-	Name  string `json:"name"`
-	Input string `json:"input"`
+	Tag    string `json:"tag"`
+	Name   string `json:"name"`
+	Stream string `json:"stream"`
+	Image  string `json:"image"`
 }
 
 func (c CameraConf) String() string {
-	parsedUrl, err := url.Parse(c.Input)
+	parsedUrl, err := url.Parse(c.Stream)
 	if err != nil {
 		log.Panic("cannot parse provided input URL", err)
 	}
@@ -68,13 +72,13 @@ func (c Config) String() string {
 }
 
 func (c Config) GetPermissionsFor(userId int64) *CameraPermissions {
-  for _, perm := range c.Permissions {
-    if perm.UserId == userId {
-      return &perm
-    }
-  }
+	for _, perm := range c.Permissions {
+		if perm.UserId == userId {
+			return &perm
+		}
+	}
 
-  return nil
+	return nil
 }
 
 var conf = getConfig()
@@ -125,6 +129,9 @@ func main() {
 
 	// /about command to provide info about bot and what it can
 	dispatcher.AddHandler(handlers.NewCommand("about", about))
+
+	// /all command to pull album with pictures immediately from all cameras at once
+	dispatcher.AddHandler(handlers.NewCommand("all", all))
 
 	// /source command to send the bot source code
 	dispatcher.AddHandler(handlers.NewCommand("source", source))
@@ -258,7 +265,7 @@ func about(bot *gotgbot.Bot, ctx *ext.Context) error {
 	}
 
 	if ctx.EffectiveSender.ChatId == conf.AdminId {
-    perms := getPermissions(conf.AdminId, conf.Permissions)
+		perms := getPermissions(conf.AdminId, conf.Permissions)
 		_, err := ctx.EffectiveChat.SendMessage(
 			bot,
 			fmt.Sprintf("Available cameras: %v", perms.Tags),
@@ -304,11 +311,57 @@ func getConfig() Config {
 }
 
 func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermissions {
-  for _, perm := range permissions {
-    if perm.UserId == userId {
-      return &perm
-    }
+	for _, perm := range permissions {
+		if perm.UserId == userId {
+			return &perm
+		}
+	}
+
+	return nil
+}
+
+func all(bot *gotgbot.Bot, ctx *ext.Context) error {
+	var lrConf *CameraConf
+	for _, cameraConf := range conf.Cameras {
+		if cameraConf.Tag == "lr" {
+			lrConf = &cameraConf
+		}
+	}
+	if lrConf == nil {
+		log.Fatal("lrConf not found", lrConf)
+	} else {
+		fmt.Println("lrConf found", lrConf)
+	}
+
+  parsedUrl, err := url.Parse(lrConf.Image)
+	if err != nil {
+		return err
+	}
+
+  password, _ := parsedUrl.User.Password();
+
+  client := &http.Client{
+    Transport: &digest.Transport{
+      Username: parsedUrl.User.Username(),
+      Password: password,
+    },
   }
 
-  return nil
+	r, err := client.Get(lrConf.Image)
+	if err != nil {
+		return err
+	}
+
+  fmt.Println("Image status code:", r.StatusCode, r.Header)
+
+	defer r.Body.Close()
+
+  m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", r.Body), &gotgbot.SendPhotoOpts{})
+  if err != nil {
+    return err
+  }
+  fmt.Println("Reponse from sending a photo", m)
+	// bot.SendMediaGroup(ctx.EffectiveChat.Id, gotgbot.InputFileByReader(), opts *gotgbot.SendMediaGroupOpts)
+
+	return nil
 }
