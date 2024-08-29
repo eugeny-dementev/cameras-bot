@@ -83,6 +83,28 @@ func (c Config) GetPermissionsFor(userId int64) *CameraPermissions {
 
 var conf = getConfig()
 
+type Cameras struct {
+	clients map[string]*http.Client
+}
+
+func (cs *Cameras) Set(tag string, client *http.Client) {
+	if cs.clients[tag] == nil {
+		cs.clients[tag] = client
+	}
+}
+
+func (cs *Cameras) Get(tag string) (*http.Client, error) {
+	if cs.clients[tag] == nil {
+		return nil, fmt.Errorf("no camera client found for %v", tag)
+	}
+
+	return cs.clients[tag], nil
+}
+
+var camerasClients = Cameras{
+	clients: make(map[string]*http.Client),
+}
+
 func main() {
 	fmt.Println("CONFIG:", conf)
 
