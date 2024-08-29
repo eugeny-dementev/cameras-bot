@@ -93,6 +93,29 @@ func (cs *Cameras) Set(tag string, client *http.Client) {
 	}
 }
 
+func (cs *Cameras) Setup(tag, imageHttpUrl string) error {
+	parsedUrl, err := url.Parse(imageHttpUrl)
+	if err != nil {
+		return err
+	}
+
+	password, hasPass := parsedUrl.User.Password()
+	if !hasPass {
+		return fmt.Errorf("missing password for camera with tag: %v", tag)
+	}
+
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: parsedUrl.User.Username(),
+			Password: password,
+		},
+	}
+
+	cs.Set(tag, client)
+
+	return nil
+}
+
 func (cs *Cameras) Get(tag string) (*http.Client, error) {
 	if cs.clients[tag] == nil {
 		return nil, fmt.Errorf("no camera client found for %v", tag)
