@@ -15,7 +15,7 @@ import (
 	"regexp"
 	"time"
 
-"github.com/icholy/digest"
+	"github.com/icholy/digest"
 
 	tg "github.com/amarnathcjd/gogram/telegram"
 
@@ -333,34 +333,34 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 		fmt.Println("lrConf found", lrConf)
 	}
 
-  parsedUrl, err := url.Parse(lrConf.Image)
+	parsedUrl, err := url.Parse(lrConf.Image)
 	if err != nil {
 		return err
 	}
 
-  password, _ := parsedUrl.User.Password();
+	password, _ := parsedUrl.User.Password()
 
-  client := &http.Client{
-    Transport: &digest.Transport{
-      Username: parsedUrl.User.Username(),
-      Password: password,
-    },
-  }
+	client := &http.Client{
+		Transport: &digest.Transport{
+			Username: parsedUrl.User.Username(),
+			Password: password,
+		},
+	}
 
 	r, err := client.Get(lrConf.Image)
 	if err != nil {
 		return err
 	}
 
-  fmt.Println("Image status code:", r.StatusCode, r.Header)
+	fmt.Println("Image status code:", r.StatusCode, r.Header)
 
 	defer r.Body.Close()
 
-  m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", r.Body), &gotgbot.SendPhotoOpts{})
-  if err != nil {
-    return err
-  }
-  fmt.Println("Reponse from sending a photo", m)
+	m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", r.Body), &gotgbot.SendPhotoOpts{})
+	if err != nil {
+		return err
+	}
+	fmt.Println("Reponse from sending a photo", m)
 	// bot.SendMediaGroup(ctx.EffectiveChat.Id, gotgbot.InputFileByReader(), opts *gotgbot.SendMediaGroupOpts)
 
 	return nil
