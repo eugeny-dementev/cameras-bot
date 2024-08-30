@@ -373,6 +373,7 @@ func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermis
 
 func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 	var lrConf *CameraConf
+	var crConf *CameraConf
 	for _, cameraConf := range conf.Cameras {
 		if cameraConf.Tag == "lr" {
 			lrConf = &cameraConf
@@ -384,35 +385,63 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 		fmt.Println("lrConf found", lrConf)
 	}
 
-	parsedUrl, err := url.Parse(lrConf.Image)
+	for _, cameraConf := range conf.Cameras {
+		if cameraConf.Tag == "cr" {
+			crConf = &cameraConf
+		}
+	}
+	if crConf == nil {
+		log.Fatal("crConf not found", crConf)
+	} else {
+		fmt.Println("crConf found", crConf)
+	}
+
+	lrClient, err := camerasClients.Get(lrConf.Tag)
 	if err != nil {
 		return err
 	}
 
-	password, _ := parsedUrl.User.Password()
+	lrResp, err := lrClient.Get(lrConf.Image)
+	if err != nil {
+		return err
+	}
 
-	client := &http.Client{
-		Transport: &digest.Transport{
-			Username: parsedUrl.User.Username(),
-			Password: password,
+	fmt.Println("Image lr status code:", lrResp.StatusCode, lrResp.Header)
+
+	defer lrResp.Body.Close()
+
+	crClient, err := camerasClients.Get(crConf.Tag)
+	if err != nil {
+		return err
+	}
+
+	crResp, err := crClient.Get(crConf.Image)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Image cr status code:", crResp.StatusCode, crResp.Header)
+
+	defer crResp.Body.Close()
+
+	// m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", lrResp.Body), &gotgbot.SendPhotoOpts{})
+	// if err != nil {
+	// 	return err
+	// }
+	// fmt.Println("Reponse from sending a photo", m)
+
+	albumMedias := []gotgbot.InputMedia{
+		&gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader("file.jpeg", lrResp.Body),
+		},
+		&gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader("file.jpeg", crResp.Body),
 		},
 	}
 
-	r, err := client.Get(lrConf.Image)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Image status code:", r.StatusCode, r.Header)
-
-	defer r.Body.Close()
-
-	m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", r.Body), &gotgbot.SendPhotoOpts{})
-	if err != nil {
-		return err
-	}
-	fmt.Println("Reponse from sending a photo", m)
-	// bot.SendMediaGroup(ctx.EffectiveChat.Id, gotgbot.InputFileByReader(), opts *gotgbot.SendMediaGroupOpts)
+	bot.SendMediaGroup(ctx.EffectiveSender.ChatId, albumMedias, &gotgbot.SendMediaGroupOpts{
+		ProtectContent: true,
+	})
 
 	return nil
 }
