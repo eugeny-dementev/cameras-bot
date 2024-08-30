@@ -431,16 +431,19 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 	// }
 	// fmt.Println("Reponse from sending a photo", m)
 
-	albumMedias := []gotgbot.InputMedia{
-		&gotgbot.InputMediaPhoto{
-			Media: gotgbot.InputFileByReader("file.jpeg", lrResp.Body),
-		},
-		&gotgbot.InputMediaPhoto{
-			Media: gotgbot.InputFileByReader("file.jpeg", crResp.Body),
-		},
+	albumMedias := make([]gotgbot.InputMedia, 0)
+	if lrResp.StatusCode >= 200 && lrResp.StatusCode <= 299 {
+		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", lrConf.Tag), lrResp.Body),
+		})
+	}
+	if crResp.StatusCode >= 200 && crResp.StatusCode <= 299 {
+		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", crConf.Tag), crResp.Body),
+		})
 	}
 
-	bot.SendMediaGroup(ctx.EffectiveSender.ChatId, albumMedias, &gotgbot.SendMediaGroupOpts{
+	bot.SendMediaGroup(ctx.EffectiveSender.ChatId, []gotgbot.InputMedia(albumMedias), &gotgbot.SendMediaGroupOpts{
 		ProtectContent: true,
 	})
 
