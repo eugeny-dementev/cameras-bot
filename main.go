@@ -133,9 +133,7 @@ func main() {
 	fmt.Println("CONFIG:", conf)
 
 	for _, cameraConf := range conf.Cameras {
-		if cameraConf.Tag == "lr" || cameraConf.Tag == "cr" {
-			camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
-		}
+    camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
 	}
 
 	userHomeDir, err := os.UserHomeDir()
