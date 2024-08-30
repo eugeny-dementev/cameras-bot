@@ -425,12 +425,6 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 
 	defer crResp.Body.Close()
 
-	// m, err := bot.SendPhoto(ctx.EffectiveChat.Id, gotgbot.InputFileByReader("lr.jpeg", lrResp.Body), &gotgbot.SendPhotoOpts{})
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println("Reponse from sending a photo", m)
-
 	albumMedias := make([]gotgbot.InputMedia, 0)
 	if lrResp.StatusCode >= 200 && lrResp.StatusCode <= 299 {
 		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
