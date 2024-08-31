@@ -380,24 +380,24 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 
+		failedDueTimeout := false
+
 		cameraResponse, err := cameraClient.Get(cameraConf.Image)
 		if err != nil {
 			fmt.Println("Request error by timeout", err)
-			continue
+			failedDueTimeout = true
 		}
 
-		fmt.Println("Camera response", cameraConf.Tag, cameraResponse.StatusCode)
+		if !failedDueTimeout && cameraResponse.StatusCode == 200 {
+			defer cameraResponse.Body.Close()
 
-		if cameraResponse != nil && cameraResponse.StatusCode == 200 {
-			// defer cameraResponse.Body.Close()
+			fmt.Println("Camera response", cameraConf.Tag, cameraResponse.StatusCode)
 			fileName := fmt.Sprintf("%v.jpeg", cameraConf.Tag)
 
 			data, err := io.ReadAll(cameraResponse.Body)
 			if err != nil {
 				return err
 			}
-
-			cameraResponse.Body.Close()
 
 			fmt.Println("File name", fileName)
 
