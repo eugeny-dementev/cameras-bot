@@ -111,7 +111,7 @@ func (cs *Cameras) Setup(tag, imageHttpUrl string) error {
 			Username: parsedUrl.User.Username(),
 			Password: password,
 		},
-		Timeout: time.Second * 2,
+		Timeout: time.Second,
 	}
 
 	cs.Set(tag, client)
