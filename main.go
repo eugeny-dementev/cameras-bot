@@ -4,8 +4,10 @@ package main
 import "C"
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
@@ -133,7 +135,7 @@ func main() {
 	fmt.Println("CONFIG:", conf)
 
 	for _, cameraConf := range conf.Cameras {
-    camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
+		camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
 	}
 
 	userHomeDir, err := os.UserHomeDir()
@@ -371,73 +373,43 @@ func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermis
 }
 
 func all(bot *gotgbot.Bot, ctx *ext.Context) error {
-	var lrConf *CameraConf
-	var crConf *CameraConf
-	for _, cameraConf := range conf.Cameras {
-		if cameraConf.Tag == "lr" {
-			lrConf = &cameraConf
-		}
-	}
-	if lrConf == nil {
-		log.Fatal("lrConf not found", lrConf)
-	} else {
-		fmt.Println("lrConf found", lrConf)
-	}
-
-	for _, cameraConf := range conf.Cameras {
-		if cameraConf.Tag == "cr" {
-			crConf = &cameraConf
-		}
-	}
-	if crConf == nil {
-		log.Fatal("crConf not found", crConf)
-	} else {
-		fmt.Println("crConf found", crConf)
-	}
-
-	lrClient, err := camerasClients.Get(lrConf.Tag)
-	if err != nil {
-		return err
-	}
-
-	lrResp, err := lrClient.Get(lrConf.Image)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Image lr status code:", lrResp.StatusCode, lrResp.Header)
-
-	defer lrResp.Body.Close()
-
-	crClient, err := camerasClients.Get(crConf.Tag)
-	if err != nil {
-		return err
-	}
-
-	crResp, err := crClient.Get(crConf.Image)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Image cr status code:", crResp.StatusCode, crResp.Header)
-
-	defer crResp.Body.Close()
-
 	albumMedias := make([]gotgbot.InputMedia, 0)
-	if lrResp.StatusCode >= 200 && lrResp.StatusCode <= 299 {
-		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
-			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", lrConf.Tag), lrResp.Body),
-		})
-	}
-	if crResp.StatusCode >= 200 && crResp.StatusCode <= 299 {
-		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
-			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", crConf.Tag), crResp.Body),
-		})
+	for _, cameraConf := range conf.Cameras {
+		cameraClient, err := camerasClients.Get(cameraConf.Tag)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println("Camera client", cameraClient)
+
+		cameraResponse, err := cameraClient.Get(cameraConf.Image)
+		if err != nil {
+			fmt.Println("Request error by timeout", err)
+			continue
+		}
+
+		fmt.Println("Camera response", cameraConf.Tag, cameraResponse.StatusCode)
+
+		if cameraResponse != nil && cameraResponse.StatusCode == 200 {
+			// defer cameraResponse.Body.Close()
+			fileName := fmt.Sprintf("%v.jpeg", cameraConf.Tag)
+
+			data, err := io.ReadAll(cameraResponse.Body)
+			if err != nil {
+				return err
+			}
+
+			cameraResponse.Body.Close()
+
+			fmt.Println("File name", fileName)
+
+			albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
+				Media: gotgbot.InputFileByReader(fileName, bytes.NewReader(data)),
+			})
+		}
 	}
 
-	bot.SendMediaGroup(ctx.EffectiveSender.ChatId, []gotgbot.InputMedia(albumMedias), &gotgbot.SendMediaGroupOpts{
-		ProtectContent: true,
-	})
+	bot.SendMediaGroup(ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
 
 	return nil
 }
