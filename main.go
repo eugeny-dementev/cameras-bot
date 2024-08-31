@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/icholy/digest"
@@ -375,33 +376,40 @@ func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermis
 func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 	buffersMap := make(map[string][]byte)
 	albumMedias := make([]gotgbot.InputMedia, 0)
+	wg := sync.WaitGroup{}
 	for _, cameraConf := range conf.Cameras {
-		cameraClient, err := camerasClients.Get(cameraConf.Tag)
-		if err != nil {
-			return err
-		}
-
-		failedDueTimeout := false
-
-		cameraResponse, err := cameraClient.Get(cameraConf.Image)
-		if err != nil {
-			fmt.Println("Request error by timeout", err)
-			failedDueTimeout = true
-		}
-
-		if !failedDueTimeout && cameraResponse.StatusCode == 200 {
-			defer cameraResponse.Body.Close()
-
-			fmt.Println("Camera response", cameraConf.Tag, cameraResponse.StatusCode)
-
-			data, err := io.ReadAll(cameraResponse.Body)
+		wg.Add(1)
+		go func(tag string) {
+			cameraClient, err := camerasClients.Get(tag)
 			if err != nil {
-				return err
+				panic(err)
 			}
 
-			buffersMap[cameraConf.Tag] = data
-		}
+			failedDueTimeout := false
+
+			cameraResponse, err := cameraClient.Get(cameraConf.Image)
+			if err != nil {
+				fmt.Println("Request error by timeout", err)
+				failedDueTimeout = true
+			}
+
+			if !failedDueTimeout && cameraResponse.StatusCode == 200 {
+				defer cameraResponse.Body.Close()
+
+				fmt.Println("Camera response", tag, cameraResponse.StatusCode)
+
+				data, err := io.ReadAll(cameraResponse.Body)
+				if err != nil {
+					fmt.Println("failed to read cameraResponse.Body")
+					return
+				}
+
+				buffersMap[tag] = data
+			}
+			wg.Done()
+		}(cameraConf.Tag)
 	}
+	wg.Wait()
 
 	for key, buffer := range buffersMap {
 		fmt.Println("Buffer key", key)
