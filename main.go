@@ -407,7 +407,10 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 		}
 	}
 
-	bot.SendMediaGroup(ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
+  _, err := bot.SendMediaGroup(ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
+  if err != nil {
+    return err
+  }
 
 	return nil
 }
