@@ -380,8 +380,6 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 			return err
 		}
 
-		fmt.Println("Camera client", cameraClient)
-
 		cameraResponse, err := cameraClient.Get(cameraConf.Image)
 		if err != nil {
 			fmt.Println("Request error by timeout", err)
