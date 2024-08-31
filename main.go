@@ -373,6 +373,7 @@ func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermis
 }
 
 func all(bot *gotgbot.Bot, ctx *ext.Context) error {
+	buffersMap := make(map[string][]byte)
 	albumMedias := make([]gotgbot.InputMedia, 0)
 	for _, cameraConf := range conf.Cameras {
 		cameraClient, err := camerasClients.Get(cameraConf.Tag)
@@ -392,19 +393,21 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 			defer cameraResponse.Body.Close()
 
 			fmt.Println("Camera response", cameraConf.Tag, cameraResponse.StatusCode)
-			fileName := fmt.Sprintf("%v.jpeg", cameraConf.Tag)
 
 			data, err := io.ReadAll(cameraResponse.Body)
 			if err != nil {
 				return err
 			}
 
-			fmt.Println("File name", fileName)
-
-			albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
-				Media: gotgbot.InputFileByReader(fileName, bytes.NewReader(data)),
-			})
+			buffersMap[cameraConf.Tag] = data
 		}
+	}
+
+	for key, buffer := range buffersMap {
+		fmt.Println("Buffer key", key)
+		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", key), bytes.NewReader(buffer)),
+		})
 	}
 
 	_, err := bot.SendMediaGroup(ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
