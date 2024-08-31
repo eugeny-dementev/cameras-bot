@@ -401,7 +401,7 @@ func all(bot *gotgbot.Bot, ctx *ext.Context) error {
 				data, err := io.ReadAll(cameraResponse.Body)
 				if err != nil {
 					fmt.Println("failed to read cameraResponse.Body")
-					return
+					panic(err)
 				}
 
 				buffersMap[tag] = data
