@@ -65,7 +65,7 @@ type Config struct {
 	BotToken    string              `json:"bot_token"`
 	Cameras     []CameraConf        `json:"cameras"`
 	Permissions []CameraPermissions `json:"permissions"`
-	AppId       int                 `json:"app_id"`
+	AppId       int32               `json:"app_id"`
 	AdminId     int64               `json:"admin_id"`
 }
 
@@ -157,7 +157,7 @@ func main() {
 	configDir := path.Join(userHomeDir, ".config/cameras-bot")
 	sessionFilePath := path.Join(configDir, "session")
 	mtproto, _ := tg.NewClient(tg.ClientConfig{
-		AppID:   int32(conf.AppId),
+		AppID:   conf.AppId,
 		AppHash: conf.AppHash,
 		Session: sessionFilePath,
 	})
