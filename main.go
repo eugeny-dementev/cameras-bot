@@ -177,13 +177,36 @@ func main() {
 	updater := ext.NewUpdater(dispatcher, nil)
 
 	// /start command to introduce the bot
-	dispatcher.AddHandler(handlers.NewCommand("start", start))
+	dispatcher.AddHandler(handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+
+		if permissions != nil {
+			return start(b, ctx)
+		}
+
+		return nil
+	}))
 
 	// /about command to provide info about bot and what it can
-	dispatcher.AddHandler(handlers.NewCommand("about", about))
+	dispatcher.AddHandler(handlers.NewCommand("about", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+
+		if permissions != nil {
+			return about(b, ctx)
+		}
+
+		return nil
+	}))
 
 	// /all command to pull album with pictures immediately from all cameras at once
-	dispatcher.AddHandler(handlers.NewCommand("all", all))
+	dispatcher.AddHandler(handlers.NewCommand("all", func(b *gotgbot.Bot, ctx *ext.Context) error {
+		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+
+		if permissions != nil {
+			return all(b, ctx, permissions.Tags)
+		}
+		return nil
+	}))
 
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
@@ -333,7 +356,7 @@ func getPermissions(userId int64, permissions []CameraPermissions) *CameraPermis
 	return nil
 }
 
-func all(bot *gotgbot.Bot, ctx *ext.Context) error {
+func all(bot *gotgbot.Bot, ctx *ext.Context, tags []string) error {
 	buffersMap := make(map[string][]byte)
 	albumMedias := make([]gotgbot.InputMedia, 0)
 	wg := sync.WaitGroup{}
