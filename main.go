@@ -132,6 +132,18 @@ var camerasClients = Cameras{
 	clients: make(map[string]*http.Client),
 }
 
+func PermissionsWrapper(handler func(b *gotgbot.Bot, ctx *ext.Context, tags []string) error) func(b *gotgbot.Bot, ctx *ext.Context) error {
+	return func(b *gotgbot.Bot, ctx *ext.Context) error {
+		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
+
+		if permissions != nil {
+			return handler(b, ctx, permissions.Tags)
+		}
+
+		return nil
+	}
+}
+
 func main() {
 	fmt.Println("CONFIG:", conf)
 
@@ -178,36 +190,13 @@ func main() {
 	updater := ext.NewUpdater(dispatcher, nil)
 
 	// /start command to introduce the bot
-	dispatcher.AddHandler(handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
-
-		if permissions != nil {
-			return start(b, ctx)
-		}
-
-		return nil
-	}))
+	dispatcher.AddHandler(handlers.NewCommand("start", PermissionsWrapper(start)))
 
 	// /about command to provide info about bot and what it can
-	dispatcher.AddHandler(handlers.NewCommand("about", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
-
-		if permissions != nil {
-			return about(b, ctx, permissions.Tags)
-		}
-
-		return nil
-	}))
+	dispatcher.AddHandler(handlers.NewCommand("about", PermissionsWrapper(about)))
 
 	// /all command to pull album with pictures immediately from all cameras at once
-	dispatcher.AddHandler(handlers.NewCommand("all", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
-
-		if permissions != nil {
-			return all(b, ctx, permissions.Tags)
-		}
-		return nil
-	}))
+	dispatcher.AddHandler(handlers.NewCommand("all", PermissionsWrapper(all)))
 
 	// Add echo handler to reply to all text messages.
 	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
@@ -239,7 +228,7 @@ func main() {
 }
 
 // start introduces the bot.
-func start(bot *gotgbot.Bot, ctx *ext.Context) error {
+func start(bot *gotgbot.Bot, ctx *ext.Context, tags []string) error {
 	_, err := ctx.EffectiveMessage.Reply(bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", bot.User.Username), &gotgbot.SendMessageOpts{
 		ParseMode: "html",
 		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
