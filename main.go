@@ -179,7 +179,7 @@ func main() {
 
 	// /start command to introduce the bot
 	dispatcher.AddHandler(handlers.NewCommand("start", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
 
 		if permissions != nil {
 			return start(b, ctx)
@@ -190,10 +190,10 @@ func main() {
 
 	// /about command to provide info about bot and what it can
 	dispatcher.AddHandler(handlers.NewCommand("about", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
 
 		if permissions != nil {
-			return about(b, ctx)
+			return about(b, ctx, permissions.Tags)
 		}
 
 		return nil
@@ -201,7 +201,7 @@ func main() {
 
 	// /all command to pull album with pictures immediately from all cameras at once
 	dispatcher.AddHandler(handlers.NewCommand("all", func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.Message.Contact.UserId, conf.Permissions)
+		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
 
 		if permissions != nil {
 			return all(b, ctx, permissions.Tags)
@@ -287,32 +287,18 @@ func echo(b *gotgbot.Bot, ctx *ext.Context) error {
 	return nil
 }
 
-func about(bot *gotgbot.Bot, ctx *ext.Context) error {
+func about(bot *gotgbot.Bot, ctx *ext.Context, tags []string) error {
 	commandRunLog(ctx, "/about", "Started command")
 
 	_, err := ctx.EffectiveChat.SendMessage(
 		bot,
-		"Bot to stream video from IP security cameras",
+		fmt.Sprintf("Bot to stream video from IP security cameras\nAvailable cameras: `%v`", tags),
 		&gotgbot.SendMessageOpts{
 			DisableNotification: true,
 		},
 	)
 	if err != nil {
 		return fmt.Errorf("failed to echo message: %w", err)
-	}
-
-	if ctx.EffectiveSender.ChatId == conf.AdminId {
-		perms := getPermissions(conf.AdminId, conf.Permissions)
-		_, err := ctx.EffectiveChat.SendMessage(
-			bot,
-			fmt.Sprintf("Available cameras: `%v`", perms.Tags),
-			&gotgbot.SendMessageOpts{
-				DisableNotification: true,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("failed to echo message: %w", err)
-		}
 	}
 
 	return nil
