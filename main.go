@@ -26,7 +26,6 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/message"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -198,9 +197,6 @@ func main() {
 	// /all command to pull album with pictures immediately from all cameras at once
 	dispatcher.AddHandler(handlers.NewCommand("all", PermissionsWrapper(all)))
 
-	// Add echo handler to reply to all text messages.
-	dispatcher.AddHandler(handlers.NewMessage(message.Text, echo))
-
 	// Start receiving updates.
 	err = updater.StartPolling(bot, &ext.PollingOpts{
 		DropPendingUpdates: true,
@@ -229,50 +225,15 @@ func main() {
 
 // start introduces the bot.
 func start(bot *gotgbot.Bot, ctx *ext.Context, tags []string) error {
-	_, err := ctx.EffectiveMessage.Reply(bot, fmt.Sprintf("Hello, I'm @%s. I <b>repeat</b> all your messages.", bot.User.Username), &gotgbot.SendMessageOpts{
-		ParseMode: "html",
-		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
-			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{{
-				{Text: "Press me", CallbackData: "start_callback"},
-			}},
-		},
-	})
+	_, err := bot.SendMessage(
+		ctx.EffectiveChat.Id,
+		fmt.Sprintf("Hello I'm @%s. I give you access to IP cameras", bot.Username),
+		&gotgbot.SendMessageOpts{},
+	)
 	if err != nil {
 		return fmt.Errorf("failed to send start message: %w", err)
 	}
 
-	success, err := ctx.Message.Chat.SetMenuButton(bot, &gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
-	if !success || err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	} else {
-		log.Println("success:", success)
-	}
-
-	return nil
-}
-
-func startCB(b *gotgbot.Bot, ctx *ext.Context) error {
-	cb := ctx.Update.CallbackQuery
-
-	_, err := cb.Answer(b, &gotgbot.AnswerCallbackQueryOpts{
-		Text: "You pressed a button!",
-	})
-	if err != nil {
-		return fmt.Errorf("failed to answer start callback query: %w", err)
-	}
-
-	_, _, err = cb.Message.EditText(b, "You edited the start message.", nil)
-	if err != nil {
-		return fmt.Errorf("failed to edit start message text: %w", err)
-	}
-	return nil
-}
-
-func echo(b *gotgbot.Bot, ctx *ext.Context) error {
-	_, err := ctx.EffectiveMessage.Reply(b, ctx.EffectiveMessage.Text, nil)
-	if err != nil {
-		return fmt.Errorf("failed to echo message: %w", err)
-	}
 	return nil
 }
 
