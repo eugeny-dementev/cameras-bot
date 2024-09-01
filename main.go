@@ -15,6 +15,7 @@ import (
 	"os"
 	"path"
 	"regexp"
+	"slices"
 	"sync"
 	"time"
 
@@ -361,7 +362,12 @@ func all(bot *gotgbot.Bot, ctx *ext.Context, tags []string) error {
 	albumMedias := make([]gotgbot.InputMedia, 0)
 	wg := sync.WaitGroup{}
 	for _, cameraConf := range conf.Cameras {
+		if !slices.Contains(tags, cameraConf.Tag) {
+			continue
+		}
+
 		wg.Add(1)
+
 		go func(tag string) {
 			cameraClient, err := camerasClients.Get(tag)
 			if err != nil {
