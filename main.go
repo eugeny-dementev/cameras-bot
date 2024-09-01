@@ -321,7 +321,7 @@ func about(bot *gotgbot.Bot, ctx *ext.Context) error {
 		perms := getPermissions(conf.AdminId, conf.Permissions)
 		_, err := ctx.EffectiveChat.SendMessage(
 			bot,
-			fmt.Sprintf("Available cameras: %v", perms.Tags),
+			fmt.Sprintf("Available cameras: `%v`", perms.Tags),
 			&gotgbot.SendMessageOpts{
 				DisableNotification: true,
 			},
