@@ -54,6 +54,11 @@ func (a *Application) Start() error {
 	return nil
 }
 
+func (a *Application) Idle() {
+	a.tgClient.Idle()
+	a.tgBotUpdater.Idle()
+}
+
 func (a *Application) initTgClient() error {
 	sessionFilePath, err := a.config.GetSessionPath()
 	if err != nil {
