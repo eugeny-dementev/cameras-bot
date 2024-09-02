@@ -10,16 +10,10 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"os"
-	"path"
 	"regexp"
 	"slices"
 	"sync"
 	"time"
-
-	"github.com/icholy/digest"
-
-	tg "github.com/amarnathcjd/gogram/telegram"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -91,21 +85,6 @@ func main() {
 		camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
 	}
 
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
-	configDir := path.Join(userHomeDir, ".config/cameras-bot")
-	sessionFilePath := path.Join(configDir, "session")
-	mtproto, _ := tg.NewClient(tg.ClientConfig{
-		AppID:   conf.AppId,
-		AppHash: conf.AppHash,
-		Session: sessionFilePath,
-	})
-	err = mtproto.Start()
-	if err != nil {
-		log.Fatal(err)
-	}
 	// Get botToken from the environment variable
 	botToken := conf.BotToken
 	if botToken == "" {
@@ -160,7 +139,6 @@ func main() {
 		log.Println("set MenuButtonCommands for all chats:", success)
 	}
 
-	mtproto.Idle()
 	updater.Idle()
 }
 
