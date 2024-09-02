@@ -38,8 +38,8 @@ func (a *Application) initTgClient() error {
 	}
 
 	mtproto, _ := tg.NewClient(tg.ClientConfig{
-		AppID:   conf.AppId,
-		AppHash: conf.AppHash,
+		AppID:   a.config.AppId,
+		AppHash: a.config.AppHash,
 		Session: sessionFilePath,
 	})
 
