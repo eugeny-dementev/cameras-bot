@@ -31,6 +31,15 @@ func (a *Application) Init() error {
 	return nil
 }
 
+func (a *Application) Start() error {
+  err := a.tgClient.Start()
+  if err != nil {
+    return err
+  }
+
+  return nil
+}
+
 func (a *Application) initTgClient() error {
 	sessionFilePath, err := a.config.GetSessionPath()
 	if err != nil {
@@ -44,8 +53,6 @@ func (a *Application) initTgClient() error {
 	})
 
 	a.tgClient = mtproto
-
-	a.tgClient.Start()
 
 	return nil
 }
