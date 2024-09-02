@@ -22,6 +22,24 @@ func (c *Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
+func (c *Config) GetConfigPath() (string, error) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(userHomeDir, ".config/cameras-bot"), nil
+}
+
+func (c *Config) GetSessionPath() (string, error) {
+  configDir, err := c.GetConfigPath()
+	if err != nil {
+		return "", err
+	}
+
+	return path.Join(configDir, "session"), nil
+}
+
 func (c *Config) GetPermissionsFor(userId int64) *CameraPermissions {
 	for _, perm := range c.Permissions {
 		if perm.UserId == userId {
