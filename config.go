@@ -18,15 +18,36 @@ type Config struct {
 	AdminId     int64               `json:"admin_id"`
 }
 
-func (c Config) String() string {
+func (c *Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
-func (c Config) GetPermissionsFor(userId int64) *CameraPermissions {
+func (c *Config) GetPermissionsFor(userId int64) *CameraPermissions {
 	for _, perm := range c.Permissions {
 		if perm.UserId == userId {
 			return &perm
 		}
+	}
+
+	return nil
+}
+
+func (c *Config) Setup() error {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	configDir := path.Join(userHomeDir, ".config/cameras-bot")
+	fileSystem := os.DirFS(configDir)
+	jsonBytes, err := fs.ReadFile(fileSystem, "config.json")
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(jsonBytes, &c)
+	if err != nil {
+		return err
 	}
 
 	return nil
