@@ -121,6 +121,14 @@ func PermissionsWrapper(handler func(b *gotgbot.Bot, ctx *ext.Context, tags []st
 func main() {
 	fmt.Println("CONFIG:", conf)
 
+  a := Application{}
+  err := a.init()
+  if err != nil {
+    fmt.Println("Error while initializing Application", err)
+  } else {
+    fmt.Println("New config:", a.config)
+  }
+
 	for _, cameraConf := range conf.Cameras {
 		camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
 	}
