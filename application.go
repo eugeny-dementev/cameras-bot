@@ -1,12 +1,14 @@
 package main
 
 import (
+	"github.com/PaulSonOfLars/gotgbot/v2"
 	tg "github.com/amarnathcjd/gogram/telegram"
 )
 
 type Application struct {
 	cameras  Cameras
 	tgClient *tg.Client
+	tgBot    *gotgbot.Bot
 	config   Config
 }
 
@@ -32,12 +34,17 @@ func (a *Application) Init() error {
 }
 
 func (a *Application) Start() error {
-  err := a.tgClient.Start()
-  if err != nil {
-    return err
-  }
+	err := a.tgClient.Start()
+	if err != nil {
+		return err
+	}
 
-  return nil
+	err = a.initTgBot()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (a *Application) initTgClient() error {
@@ -57,5 +64,13 @@ func (a *Application) initTgClient() error {
 	return nil
 }
 
-  return nil
+func (a *Application) initTgBot() error {
+	bot, err := gotgbot.NewBot(a.config.BotToken, nil)
+	if err != nil {
+		return err
+	}
+
+	a.tgBot = bot
+
+	return nil
 }
