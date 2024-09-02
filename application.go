@@ -5,6 +5,7 @@ import (
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 	tg "github.com/amarnathcjd/gogram/telegram"
 )
 
@@ -57,6 +58,22 @@ func (a *Application) Start() error {
 func (a *Application) Idle() {
 	a.tgClient.Idle()
 	a.tgBotUpdater.Idle()
+}
+
+func (a *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
+	a.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
+		err := handler(&HandlerContext{
+			bot: bot,
+			ctx: ctx,
+			app: a,
+		})
+
+    if err != nil {
+      return err
+    }
+
+		return nil
+	}))
 }
 
 func (a *Application) initTgClient() error {
