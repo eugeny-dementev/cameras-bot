@@ -4,7 +4,7 @@ type Application struct {
   config Config
 }
 
-func (a *Application) init() error {
+func (a *Application) Init() error {
   a.config = Config{}
   err := a.config.Setup()
   if err != nil {

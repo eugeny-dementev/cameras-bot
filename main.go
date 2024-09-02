@@ -122,7 +122,7 @@ func main() {
 	fmt.Println("CONFIG:", conf)
 
   a := Application{}
-  err := a.init()
+  err := a.Init()
   if err != nil {
     fmt.Println("Error while initializing Application", err)
   } else {
