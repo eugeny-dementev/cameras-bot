@@ -1,15 +1,20 @@
 package main
 
 import (
+	"log"
+
 	"github.com/PaulSonOfLars/gotgbot/v2"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	tg "github.com/amarnathcjd/gogram/telegram"
 )
 
 type Application struct {
-	cameras  Cameras
-	tgClient *tg.Client
-	tgBot    *gotgbot.Bot
-	config   Config
+	cameras         Cameras
+	tgClient        *tg.Client
+	tgBot           *gotgbot.Bot
+	tgBotDispatcher *ext.Dispatcher
+	tgBotUpdater    *ext.Updater
+	config          Config
 }
 
 func (a *Application) Init() error {
@@ -29,6 +34,8 @@ func (a *Application) Init() error {
 	if err != nil {
 		return err
 	}
+
+	a.initTgBotDispather()
 
 	return nil
 }
@@ -73,4 +80,17 @@ func (a *Application) initTgBot() error {
 	a.tgBot = bot
 
 	return nil
+}
+
+func (a *Application) initTgBotDispather() {
+	a.tgBotDispatcher = ext.NewDispatcher(&ext.DispatcherOpts{
+		// If an error is returned by a handler, log it and continue going.
+		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
+			log.Println("an error occurred while handling update:", err.Error())
+			return ext.DispatcherActionNoop
+		},
+		MaxRoutines: ext.DefaultMaxRoutines,
+	})
+
+	a.tgBotUpdater = ext.NewUpdater(a.tgBotDispatcher, nil)
 }
