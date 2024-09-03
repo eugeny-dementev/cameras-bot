@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path"
 )
@@ -69,26 +68,4 @@ func (c *Config) Setup() error {
 	}
 
 	return nil
-}
-
-func getConfig() Config {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	configDir := path.Join(userHomeDir, ".config/cameras-bot")
-	fileSystem := os.DirFS(configDir)
-	jsonBytes, err := fs.ReadFile(fileSystem, "config.json")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	conf := Config{}
-	err = json.Unmarshal(jsonBytes, &conf)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return conf
 }
