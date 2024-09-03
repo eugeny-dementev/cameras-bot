@@ -55,14 +55,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("App started. Config:", app.config)
+		fmt.Println("App initialized. Config:", app.config)
 	}
 
 	app.AddCommand("start", StartCmd)
 	app.AddCommand("about", AboutCmd)
 	app.AddCommand("all", AllCmd)
 
-	app.Start()
+	err = app.Start()
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("App started")
+	}
 
 	app.Idle()
 }
