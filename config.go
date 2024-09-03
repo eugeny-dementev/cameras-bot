@@ -18,7 +18,7 @@ type Config struct {
 	AdminId     int64               `json:"admin_id"`
 }
 
-func (c *Config) String() string {
+func (c Config) String() string {
 	return fmt.Sprintf("AppHash: %v\nAdminId: %v\nCameras: %v\nPermissions: %v", len(c.AppHash), c.AdminId, c.Cameras, c.Permissions)
 }
 
