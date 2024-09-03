@@ -15,7 +15,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	} else {
-		fmt.Println("App initialized. Config:", app.config)
+		fmt.Println("App initialized\nConfig:", app.config)
 	}
 
 	app.AddCommand("start", StartCmd)
