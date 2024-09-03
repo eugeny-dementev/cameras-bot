@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
@@ -52,6 +53,16 @@ func (a *Application) Start() error {
 		return err
 	}
 
+	a.tgBotUpdater.StartPolling(a.tgBot, &ext.PollingOpts{
+		DropPendingUpdates: true,
+		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
+			Timeout: 9,
+			RequestOpts: &gotgbot.RequestOpts{
+				Timeout: time.Second * 10,
+			},
+		},
+	})
+
 	return nil
 }
 
@@ -67,10 +78,9 @@ func (a *Application) AddCommand(name string, handler func(context *HandlerConte
 			ctx: ctx,
 			app: a,
 		})
-
-    if err != nil {
-      return err
-    }
+		if err != nil {
+			return err
+		}
 
 		return nil
 	}))
