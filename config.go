@@ -41,9 +41,9 @@ func (c *Config) GetSessionPath() (string, error) {
 }
 
 func (c *Config) GetPermissionsFor(userId int64) *CameraPermissions {
-	for _, perm := range c.Permissions {
-		if perm.UserId == userId {
-			return &perm
+	for _, permissions := range c.Permissions {
+		if permissions.UserId == userId {
+			return &permissions
 		}
 	}
 
