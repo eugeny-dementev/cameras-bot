@@ -94,7 +94,7 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 		wg.Add(1)
 
 		go func(tag string) {
-			cameraClient, err := camerasClients.Get(tag)
+			cameraClient, err := cs.Get(tag)
 			if err != nil {
 				panic(err)
 			}

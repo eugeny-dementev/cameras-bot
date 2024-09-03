@@ -6,7 +6,6 @@ import "C"
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"regexp"
 
@@ -44,10 +43,6 @@ func (p CameraPermissions) String() string {
 }
 
 var conf = getConfig()
-
-var camerasClients = Cameras{
-	clients: make(map[string]*http.Client),
-}
 
 func main() {
 	app := Application{}
