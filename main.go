@@ -22,14 +22,14 @@ import (
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
 
-type CameraConf struct {
+type CameraConfig struct {
 	Tag    string `json:"tag"`
 	Name   string `json:"name"`
 	Stream string `json:"stream"`
 	Image  string `json:"image"`
 }
 
-func (c CameraConf) String() string {
+func (c CameraConfig) String() string {
 	parsedUrl, err := url.Parse(c.Stream)
 	if err != nil {
 		log.Panic("cannot parse provided input URL", err)

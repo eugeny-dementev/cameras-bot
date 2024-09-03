@@ -12,7 +12,7 @@ import (
 type Config struct {
 	AppHash     string              `json:"app_hash"`
 	BotToken    string              `json:"bot_token"`
-	Cameras     []CameraConf        `json:"cameras"`
+	Cameras     []CameraConfig      `json:"cameras"`
 	Permissions []CameraPermissions `json:"permissions"`
 	AppId       int32               `json:"app_id"`
 	AdminId     int64               `json:"admin_id"`
@@ -32,7 +32,7 @@ func (c *Config) GetConfigPath() (string, error) {
 }
 
 func (c *Config) GetSessionPath() (string, error) {
-  configDir, err := c.GetConfigPath()
+	configDir, err := c.GetConfigPath()
 	if err != nil {
 		return "", err
 	}

@@ -22,7 +22,7 @@ func (cs *Cameras) Set(tag string, client *http.Client) {
 	}
 }
 
-func (cs *Cameras) Setup(confs []CameraConf) error {
+func (cs *Cameras) Setup(confs []CameraConfig) error {
 	cs.clients = make(map[string]*http.Client)
 
 	for _, conf := range confs {
