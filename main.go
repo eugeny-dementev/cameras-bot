@@ -58,18 +58,6 @@ var camerasClients = Cameras{
 	clients: make(map[string]*http.Client),
 }
 
-func PermissionsWrapper(handler func(b *gotgbot.Bot, ctx *ext.Context, tags []string) error) func(b *gotgbot.Bot, ctx *ext.Context) error {
-	return func(b *gotgbot.Bot, ctx *ext.Context) error {
-		permissions := getPermissions(ctx.EffectiveUser.Id, conf.Permissions)
-
-		if permissions != nil {
-			return handler(b, ctx, permissions.Tags)
-		}
-
-		return nil
-	}
-}
-
 func main() {
 	fmt.Println("CONFIG:", conf)
 
