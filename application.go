@@ -63,6 +63,13 @@ func (a *Application) Start() error {
 		},
 	})
 
+	success, err := a.tgBot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
+	if !success || err != nil {
+		log.Fatal("failed to set chat menu button", err)
+	} else {
+		log.Println("set MenuButtonCommands for all chats:", success)
+	}
+
 	return nil
 }
 
