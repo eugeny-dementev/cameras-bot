@@ -13,11 +13,9 @@ import (
 	"regexp"
 	"slices"
 	"sync"
-	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
-	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
@@ -59,75 +57,25 @@ var camerasClients = Cameras{
 }
 
 func main() {
-	fmt.Println("CONFIG:", conf)
+	app := Application{}
+	err := app.Init()
+	if err != nil {
+		panic(err)
+	} else {
+		fmt.Println("App started. Config:", app.config)
+	}
 
-  a := Application{}
-  err := a.Init()
-  if err != nil {
-    fmt.Println("Error while initializing Application", err)
-  } else {
-    fmt.Println("New config:", a.config)
-  }
+	app.AddCommand("start", StartCmd)
+	app.AddCommand("about", AboutCmd)
+	app.AddCommand("all", AllCmd)
+
+	app.Start()
 
 	for _, cameraConf := range conf.Cameras {
-		camerasClients.Setup(cameraConf.Tag, cameraConf.Image)
+		camerasClients.SetupOne(cameraConf.Tag, cameraConf.Image)
 	}
 
-	// Get botToken from the environment variable
-	botToken := conf.BotToken
-	if botToken == "" {
-		panic("TOKEN environment variable is empty")
-	}
-
-	// Create bot from environment value.
-	bot, err := gotgbot.NewBot(botToken, nil)
-	if err != nil {
-		panic("failed to create new bot: " + err.Error())
-	}
-
-	// Create updater and dispatcher.
-	dispatcher := ext.NewDispatcher(&ext.DispatcherOpts{
-		// If an error is returned by a handler, log it and continue going.
-		Error: func(b *gotgbot.Bot, ctx *ext.Context, err error) ext.DispatcherAction {
-			log.Println("an error occurred while handling update:", err.Error())
-			return ext.DispatcherActionNoop
-		},
-		MaxRoutines: ext.DefaultMaxRoutines,
-	})
-	updater := ext.NewUpdater(dispatcher, nil)
-
-	// /start command to introduce the bot
-	dispatcher.AddHandler(handlers.NewCommand("start", PermissionsWrapper(start)))
-
-	// /about command to provide info about bot and what it can
-	dispatcher.AddHandler(handlers.NewCommand("about", PermissionsWrapper(about)))
-
-	// /all command to pull album with pictures immediately from all cameras at once
-	dispatcher.AddHandler(handlers.NewCommand("all", PermissionsWrapper(all)))
-
-	// Start receiving updates.
-	err = updater.StartPolling(bot, &ext.PollingOpts{
-		DropPendingUpdates: true,
-		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
-			Timeout: 9,
-			RequestOpts: &gotgbot.RequestOpts{
-				Timeout: time.Second * 10,
-			},
-		},
-	})
-	if err != nil {
-		panic("failed to start polling: " + err.Error())
-	}
-	log.Printf("%s has been started...\n", bot.Username)
-
-	success, err := bot.SetChatMenuButton(&gotgbot.SetChatMenuButtonOpts{MenuButton: gotgbot.MenuButtonCommands{}})
-	if !success || err != nil {
-		log.Fatal("failed to set chat menu button", err)
-	} else {
-		log.Println("set MenuButtonCommands for all chats:", success)
-	}
-
-	updater.Idle()
+	app.Idle()
 }
 
 // start introduces the bot.
