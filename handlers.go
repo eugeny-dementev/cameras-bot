@@ -24,7 +24,7 @@ func AboutCmd(c *HandlerContext) error {
 	if permissions == nil {
 		_, err := c.ctx.EffectiveChat.SendMessage(
 			c.bot,
-			fmt.Sprintf("No Available Cameras"),
+			"No Available Cameras",
 			&gotgbot.SendMessageOpts{
 				DisableNotification: true,
 			},
