@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -43,6 +44,41 @@ func AboutCmd(c *HandlerContext) error {
 			DisableNotification: true,
 		},
 	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func AllCmd(c *HandlerContext) error {
+	permissions := c.app.config.GetPermissionsFor(c.ctx.EffectiveUser.Id)
+	if permissions == nil {
+		_, err := c.ctx.EffectiveChat.SendMessage(
+			c.bot,
+			"No Available Cameras",
+			&gotgbot.SendMessageOpts{
+				DisableNotification: true,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+
+	imageBuffers := c.app.cameras.GetAllImages(permissions.Tags)
+
+	albumMedias := make([]gotgbot.InputMedia, 0)
+	for key, buffer := range imageBuffers {
+		fmt.Println("Buffer key", key)
+		albumMedias = append(albumMedias, &gotgbot.InputMediaPhoto{
+			Media: gotgbot.InputFileByReader(fmt.Sprintf("%v.jpeg", key), bytes.NewReader(buffer)),
+		})
+	}
+
+	_, err := c.bot.SendMediaGroup(c.ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
 	if err != nil {
 		return err
 	}
