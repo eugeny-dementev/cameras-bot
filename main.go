@@ -42,8 +42,6 @@ func (p CameraPermissions) String() string {
 	return fmt.Sprintf("{UserId: %v, Tags: %v}", p.UserId, p.Tags)
 }
 
-var conf = getConfig()
-
 func main() {
 	app := Application{}
 	err := app.Init()
