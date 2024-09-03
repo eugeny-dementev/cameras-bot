@@ -64,9 +64,5 @@ func main() {
 
 	app.Start()
 
-	for _, cameraConf := range conf.Cameras {
-		camerasClients.SetupOne(cameraConf.Tag, cameraConf.Image)
-	}
-
 	app.Idle()
 }
