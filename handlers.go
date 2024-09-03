@@ -22,7 +22,18 @@ func StartCmd(c *HandlerContext) error {
 func AboutCmd(c *HandlerContext) error {
 	permissions := c.app.config.GetPermissionsFor(c.ctx.EffectiveUser.Id)
 	if permissions == nil {
-		return fmt.Errorf("No Available Cameras")
+		_, err := c.ctx.EffectiveChat.SendMessage(
+			c.bot,
+			fmt.Sprintf("No Available Cameras"),
+			&gotgbot.SendMessageOpts{
+				DisableNotification: true,
+			},
+		)
+		if err != nil {
+			return err
+		}
+
+		return nil
 	}
 
 	_, err := c.ctx.EffectiveChat.SendMessage(
