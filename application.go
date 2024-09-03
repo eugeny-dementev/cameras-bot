@@ -71,13 +71,9 @@ func (a *Application) Idle() {
 	a.tgBotUpdater.Idle()
 }
 
-func (a *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
-	a.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
-		err := handler(&HandlerContext{
-			bot: bot,
-			ctx: ctx,
-			app: a,
-		})
+func (app *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
+	app.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
+		err := handler(&HandlerContext{bot, ctx, app})
 		if err != nil {
 			return err
 		}
