@@ -14,6 +14,7 @@ import (
 
 type Cameras struct {
 	clients map[string]*http.Client
+	configs []CameraConfig
 }
 
 func (cs *Cameras) Set(tag string, client *http.Client) {
@@ -22,10 +23,11 @@ func (cs *Cameras) Set(tag string, client *http.Client) {
 	}
 }
 
-func (cs *Cameras) Setup(confs []CameraConfig) error {
+func (cs *Cameras) Setup(configs []CameraConfig) error {
+	cs.configs = configs
 	cs.clients = make(map[string]*http.Client)
 
-	for _, conf := range confs {
+	for _, conf := range cs.configs {
 		parsedUrl, err := url.Parse(conf.Image)
 		if err != nil {
 			return err
@@ -86,8 +88,8 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 	m := make(map[string][]byte)
 
 	wg := sync.WaitGroup{}
-	for _, cameraConf := range conf.Cameras {
-		if !slices.Contains(tags, cameraConf.Tag) {
+	for _, config := range cs.configs {
+		if !slices.Contains(tags, config.Tag) {
 			continue
 		}
 
@@ -101,7 +103,7 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 
 			failedDueTimeout := false
 
-			cameraResponse, err := cameraClient.Get(cameraConf.Image)
+			cameraResponse, err := cameraClient.Get(config.Image)
 			if err != nil {
 				fmt.Println("Request error by timeout", err)
 				failedDueTimeout = true
@@ -121,7 +123,7 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 				m[tag] = data
 			}
 			wg.Done()
-		}(cameraConf.Tag)
+		}(config.Tag)
 	}
 	wg.Wait()
 
