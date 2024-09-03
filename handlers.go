@@ -30,7 +30,7 @@ func AboutCmd(c *HandlerContext) error {
 		},
 	)
 	if err != nil {
-		return fmt.Errorf("failed to echo message: %w", err)
+		return err
 	}
 
 	return nil
