@@ -5,42 +5,9 @@ import "C"
 
 import (
 	"fmt"
-	"log"
-	"net/url"
-	"regexp"
 
 	_ "eugeny-dementev.github.io/cameras-bot/ntgcalls"
 )
-
-type CameraConfig struct {
-	Tag    string `json:"tag"`
-	Name   string `json:"name"`
-	Stream string `json:"stream"`
-	Image  string `json:"image"`
-}
-
-func (c CameraConfig) String() string {
-	parsedUrl, err := url.Parse(c.Stream)
-	if err != nil {
-		log.Panic("cannot parse provided input URL", err)
-	}
-
-	re := regexp.MustCompile("[a-f0-9]")
-
-	parsedUrl.User = url.UserPassword("root", "root")
-	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
-
-	return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
-}
-
-type CameraPermissions struct {
-	Tags   []string `json:"tags"`
-	UserId int64    `json:"user_id"`
-}
-
-func (p CameraPermissions) String() string {
-	return fmt.Sprintf("{UserId: %v, Tags: %v}", p.UserId, p.Tags)
-}
 
 func main() {
 	app := Application{}
