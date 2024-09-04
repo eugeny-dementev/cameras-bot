@@ -68,7 +68,22 @@ func AllCmd(c *HandlerContext) error {
 		return nil
 	}
 
-	imageBuffers := c.app.cameras.GetAllImages(permissions.Tags)
+	cameraStatuses, err := c.app.cameras.CheckAvailableCameras()
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Camera Statuses:", cameraStatuses)
+
+	tags := make([]string, 0)
+
+	for _, tag := range permissions.Tags {
+		if cameraStatuses[tag] {
+			tags = append(tags, tag)
+		}
+	}
+
+	imageBuffers := c.app.cameras.GetAllImages(tags)
 
 	albumMedias := make([]gotgbot.InputMedia, 0)
 	for key, buffer := range imageBuffers {
@@ -78,7 +93,7 @@ func AllCmd(c *HandlerContext) error {
 		})
 	}
 
-	_, err := c.bot.SendMediaGroup(c.ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
+	_, err = c.bot.SendMediaGroup(c.ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{})
 	if err != nil {
 		return err
 	}
