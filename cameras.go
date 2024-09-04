@@ -46,7 +46,7 @@ func (cs *Cameras) Setup(configs []CameraConfig) error {
 				Username: parsedUrl.User.Username(),
 				Password: password,
 			},
-			Timeout: time.Second,
+			Timeout: time.Second * 2,
 		}
 
 		checker := &http.Client{
