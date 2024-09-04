@@ -61,30 +61,6 @@ func (cs *Cameras) Setup(configs []CameraConfig) error {
 	return nil
 }
 
-func (cs *Cameras) SetupOne(tag, imageHttpUrl string) error {
-	parsedUrl, err := url.Parse(imageHttpUrl)
-	if err != nil {
-		return err
-	}
-
-	password, hasPass := parsedUrl.User.Password()
-	if !hasPass {
-		return fmt.Errorf("missing password for camera with tag: %v", tag)
-	}
-
-	client := &http.Client{
-		Transport: &digest.Transport{
-			Username: parsedUrl.User.Username(),
-			Password: password,
-		},
-		Timeout: time.Second,
-	}
-
-	cs.Set(tag, client)
-
-	return nil
-}
-
 func (cs *Cameras) Get(tag string) (*http.Client, error) {
 	if cs.clients[tag] == nil {
 		return nil, fmt.Errorf("no camera client found for %v", tag)
