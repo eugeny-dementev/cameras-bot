@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"slices"
 	"sync"
 	"time"
@@ -13,8 +14,9 @@ import (
 )
 
 type Cameras struct {
-	clients map[string]*http.Client
-	configs []CameraConfig
+	clients  map[string]*http.Client
+	checkers map[string]*http.Client
+	configs  []CameraConfig
 }
 
 func (cs *Cameras) Set(tag string, client *http.Client) {
@@ -26,6 +28,7 @@ func (cs *Cameras) Set(tag string, client *http.Client) {
 func (cs *Cameras) Setup(configs []CameraConfig) error {
 	cs.configs = configs
 	cs.clients = make(map[string]*http.Client)
+  cs.checkers = make(map[string]*http.Client)
 
 	for _, conf := range cs.configs {
 		parsedUrl, err := url.Parse(conf.Image)
@@ -45,6 +48,12 @@ func (cs *Cameras) Setup(configs []CameraConfig) error {
 			},
 			Timeout: time.Second,
 		}
+
+		checker := &http.Client{
+			Timeout: time.Millisecond * 200,
+		}
+
+    cs.checkers[conf.Tag] = checker
 
 		cs.Set(conf.Tag, client)
 	}
@@ -128,4 +137,35 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 	wg.Wait()
 
 	return m
+}
+
+func (cs *Cameras) CheckAvailableCameras() (map[string]bool, error) {
+	cameraStatuses:= make(map[string]bool)
+  wg := sync.WaitGroup{}
+	for _, config := range cs.configs {
+    checker := cs.checkers[config.Tag]
+    if checker == nil {
+      continue
+    }
+
+    wg.Add(1)
+    go func() {
+
+      res, err := checker.Get(config.Image)
+      if err != nil || os.IsTimeout(err) || res == nil {
+        cameraStatuses[config.Tag] = false
+        wg.Done()
+        return
+      }
+
+      if res.StatusCode == 401 {
+        cameraStatuses[config.Tag] = true
+        wg.Done()
+        return
+      }
+    }()
+	}
+  wg.Wait()
+
+  return cameraStatuses, nil
 }
