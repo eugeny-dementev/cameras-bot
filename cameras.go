@@ -31,7 +31,7 @@ func (cs *Cameras) Setup(configs []CameraConfig) error {
   cs.checkers = make(map[string]*http.Client)
 
 	for _, conf := range cs.configs {
-		parsedUrl, err := url.Parse(conf.Image)
+		parsedUrl, err := url.Parse(conf.Image())
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func (cs *Cameras) GetAllImages(tags []string) map[string][]byte {
 
 			failedDueTimeout := false
 
-			cameraResponse, err := cameraClient.Get(config.Image)
+			cameraResponse, err := cameraClient.Get(config.Image())
 			if err != nil {
 				fmt.Println("Request error by timeout", err)
 				failedDueTimeout = true
@@ -127,7 +127,7 @@ func (cs *Cameras) CheckAvailableCameras() (map[string]bool, error) {
     wg.Add(1)
     go func() {
 
-      res, err := checker.Get(config.Image)
+      res, err := checker.Get(config.Image())
       if err != nil || os.IsTimeout(err) || res == nil {
         cameraStatuses[config.Tag] = false
         wg.Done()
