@@ -4,11 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/fs"
-	"log"
 	"net/url"
 	"os"
 	"path"
-	"regexp"
 )
 
 type Config struct {
@@ -74,28 +72,42 @@ func (c *Config) Setup() error {
 }
 
 type CameraConfig struct {
-	Tag    string `json:"tag"`
-	Name   string `json:"name"`
-	Stream string `json:"stream"`
-	Image  string `json:"image"`
+	Tag  string `json:"tag"`
+	Name string `json:"name"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+	Host string `json:"host"`
 }
 
 func (c CameraConfig) String() string {
-	parsedUrl, err := url.Parse(c.Stream)
-	if err != nil {
-		log.Panic("cannot parse provided input URL", err)
+	return fmt.Sprintf("{Name: %v, Tag: %v, Host: %v}", c.Name, c.Tag, c.Host)
+}
+
+func (c *CameraConfig) Image() string {
+	url := url.URL{
+		Scheme:   "http",
+		Host:     c.Host,
+		User:     url.UserPassword(c.User, c.Pass),
+		Path:     "ISAPI/Streaming/channels/101/picture",
+		RawQuery: "snapShotImageType=JPEG",
 	}
 
-	re := regexp.MustCompile("[a-f0-9]")
+	return url.String()
+}
 
-	parsedUrl.User = url.UserPassword("root", "root")
-	parsedUrl.Host = re.ReplaceAllString(parsedUrl.Host, "*")
+func (c *CameraConfig) Stream() string {
+	url := url.URL{
+		Scheme: "http",
+		Host:   fmt.Sprintf("%v:%v", c.Host, 554),
+		User:   url.UserPassword(c.User, c.Pass),
+		Path:   "ISAPI/Streaming/Channels/101",
+	}
 
-	return fmt.Sprintf("{Name: %v, Tag: %v, URL: %v}", c.Name, c.Tag, parsedUrl)
+	return url.String()
 }
 
 type CameraPermissions struct {
-	Tags   []string `json:"tags"`
+	Tags   []string ``
 	UserId int64    `json:"user_id"`
 }
 
