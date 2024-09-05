@@ -87,7 +87,6 @@ func (c *CameraConfig) Image() string {
 	url := url.URL{
 		Scheme:   "http",
 		Host:     c.Host,
-		User:     url.UserPassword(c.User, c.Pass),
 		Path:     "ISAPI/Streaming/channels/101/picture",
 		RawQuery: "snapShotImageType=JPEG",
 	}
