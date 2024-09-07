@@ -105,5 +105,13 @@ func AllCmd(c *HandlerContext) error {
 }
 
 func RecordCmd (c *HandlerContext) error {
+	// cmd := exec.Command("ffmpeg")
+  // ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
+	//cmd.Args = append(
+	//	cmd.Args,
+  //  "-t", "00:00:05",
+  //  "-i", "rtsp://admin:password@192.168.1.111:554/ISAPI/Streaming/Channels/101",
+  //  "./room.mp4",
+	//)
   return nil
 }
