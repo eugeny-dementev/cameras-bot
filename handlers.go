@@ -103,3 +103,7 @@ func AllCmd(c *HandlerContext) error {
 
 	return nil
 }
+
+func RecordCmd (c *HandlerContext) error {
+  return nil
+}

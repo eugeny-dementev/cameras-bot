@@ -21,6 +21,7 @@ func main() {
 	app.AddCommand("start", StartCmd)
 	app.AddCommand("about", AboutCmd)
 	app.AddCommand("all", AllCmd)
+  app.AddCommand("record", RecordCmd)
 
 	err = app.Start()
 	if err != nil {
