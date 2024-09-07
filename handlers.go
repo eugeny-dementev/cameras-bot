@@ -105,15 +105,6 @@ func AllCmd(c *HandlerContext) error {
 }
 
 func RecordCmd(c *HandlerContext) error {
-	// cmd := exec.Command("ffmpeg")
-	// ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
-	//cmd.Args = append(
-	//	cmd.Args,
-	//  "-t", "00:00:05",
-	//  "-i", "rtsp://admin:password@192.168.1.111:554/ISAPI/Streaming/Channels/101",
-	//  "./room.mp4",
-	//)
-
 	cameraButtons := make([]gotgbot.InlineKeyboardButton, 0)
 
 	for _, cameraConfig := range c.app.config.Cameras {
@@ -138,6 +129,15 @@ func RecordCmd(c *HandlerContext) error {
 
 func RecordCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
+		// cmd := exec.Command("ffmpeg")
+		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
+		//cmd.Args = append(
+		//	cmd.Args,
+		//  "-t", "00:00:05",
+		//  "-i", config.Stream(),
+		//  "./room.mp4",
+		//)
+
 		// cq := c.ctx.CallbackQuery
 		fmt.Println("Callback query data:", config.Tag)
 		_, err := c.bot.SendMessage(
