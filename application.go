@@ -7,6 +7,7 @@ import (
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
+	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers/filters/callbackquery"
 	tg "github.com/amarnathcjd/gogram/telegram"
 )
 
@@ -80,6 +81,22 @@ func (a *Application) Idle() {
 
 func (app *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
 	app.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
+		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
+		if permissions == nil {
+			return nil
+		}
+
+		err := handler(&HandlerContext{bot, ctx, app})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}))
+}
+
+func (app *Application) AddCallback(callback string, handler func(context *HandlerContext) error) {
+	app.tgBotDispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(callback), func(bot *gotgbot.Bot, ctx *ext.Context) error {
 		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
 		if permissions == nil {
 			return nil
