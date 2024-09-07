@@ -142,7 +142,7 @@ func RecordCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 		fmt.Println("Callback query data:", config.Tag)
 		_, err := c.bot.SendMessage(
 			c.ctx.EffectiveUser.Id,
-			fmt.Sprintf("Chosen camera: %v", config.Name),
+			fmt.Sprintf("Recording started for %v", config.Name),
 			&gotgbot.SendMessageOpts{},
 		)
 		if err != nil {
