@@ -104,14 +104,35 @@ func AllCmd(c *HandlerContext) error {
 	return nil
 }
 
-func RecordCmd (c *HandlerContext) error {
+func RecordCmd(c *HandlerContext) error {
 	// cmd := exec.Command("ffmpeg")
-  // ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
+	// ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
 	//cmd.Args = append(
 	//	cmd.Args,
-  //  "-t", "00:00:05",
-  //  "-i", "rtsp://admin:password@192.168.1.111:554/ISAPI/Streaming/Channels/101",
-  //  "./room.mp4",
+	//  "-t", "00:00:05",
+	//  "-i", "rtsp://admin:password@192.168.1.111:554/ISAPI/Streaming/Channels/101",
+	//  "./room.mp4",
 	//)
-  return nil
+
+	cameraButtons := make([]gotgbot.InlineKeyboardButton, 0)
+
+	for _, cameraConfig := range c.app.config.Cameras {
+		cameraButtons = append(cameraButtons, gotgbot.InlineKeyboardButton{
+			Text:         cameraConfig.Name,
+			CallbackData: "record_callback",
+		})
+	}
+
+	_, err := c.bot.SendMessage(c.ctx.EffectiveUser.Id, "Choose camera to record", &gotgbot.SendMessageOpts{
+		ParseMode: "html",
+		ReplyMarkup: gotgbot.InlineKeyboardMarkup{
+			InlineKeyboard: [][]gotgbot.InlineKeyboardButton{cameraButtons},
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to send camera buttons: %w", err)
+	}
+
+	return nil
+}
 }
