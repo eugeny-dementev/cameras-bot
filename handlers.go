@@ -135,4 +135,12 @@ func RecordCmd(c *HandlerContext) error {
 
 	return nil
 }
+
+func RecordCallback(c *HandlerContext) error {
+	_, err := c.bot.SendMessage(c.ctx.EffectiveUser.Id, "Camera were chosen", &gotgbot.SendMessageOpts{})
+	if err != nil {
+		return fmt.Errorf("failed to send record_callback response: %w", err)
+	}
+
+	return nil
 }

@@ -22,6 +22,7 @@ func main() {
 	app.AddCommand("about", AboutCmd)
 	app.AddCommand("all", AllCmd)
   app.AddCommand("record", RecordCmd)
+  app.AddCallback("record_callback", RecordCallback)
 
 	err = app.Start()
 	if err != nil {
