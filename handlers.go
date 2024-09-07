@@ -119,7 +119,7 @@ func RecordCmd(c *HandlerContext) error {
 	for _, cameraConfig := range c.app.config.Cameras {
 		cameraButtons = append(cameraButtons, gotgbot.InlineKeyboardButton{
 			Text:         cameraConfig.Name,
-			CallbackData: "record_callback",
+			CallbackData: prepareCallbackHood(cameraConfig.Tag),
 		})
 	}
 
@@ -136,11 +136,23 @@ func RecordCmd(c *HandlerContext) error {
 	return nil
 }
 
-func RecordCallback(c *HandlerContext) error {
-	_, err := c.bot.SendMessage(c.ctx.EffectiveUser.Id, "Camera were chosen", &gotgbot.SendMessageOpts{})
-	if err != nil {
-		return fmt.Errorf("failed to send record_callback response: %w", err)
-	}
+func RecordCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
+	return func(c *HandlerContext) error {
+		// cq := c.ctx.CallbackQuery
+		fmt.Println("Callback query data:", config.Tag)
+		_, err := c.bot.SendMessage(
+			c.ctx.EffectiveUser.Id,
+			fmt.Sprintf("Chosen camera: %v", config.Name),
+			&gotgbot.SendMessageOpts{},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to send record_callback response: %w", err)
+		}
 
-	return nil
+		return nil
+	}
+}
+
+func prepareCallbackHood(tag string) string {
+	return fmt.Sprintf("record_callback_%v", tag)
 }
