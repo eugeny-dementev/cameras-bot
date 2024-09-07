@@ -81,11 +81,13 @@ func (a *Application) Idle() {
 
 func (app *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
 	app.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
+		log.Println("Command is run", name)
 		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
 		if permissions == nil {
 			return nil
 		}
 
+		log.Println("Command is allowed", name)
 		err := handler(&HandlerContext{bot, ctx, app})
 		if err != nil {
 			return err
@@ -97,11 +99,13 @@ func (app *Application) AddCommand(name string, handler func(context *HandlerCon
 
 func (app *Application) AddCallback(callback string, handler func(context *HandlerContext) error) {
 	app.tgBotDispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(callback), func(bot *gotgbot.Bot, ctx *ext.Context) error {
+		log.Println("Callback is run", callback)
 		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
 		if permissions == nil {
 			return nil
 		}
 
+		log.Println("Callback is allowed", callback)
 		err := handler(&HandlerContext{bot, ctx, app})
 		if err != nil {
 			return err
