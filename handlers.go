@@ -176,11 +176,11 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		cq.Answer(c.bot, &gotgbot.AnswerCallbackQueryOpts{})
 
 		inputValue, ok := c.app.state.Get(userId, "record_input_url")
-		input := inputValue.(string)
 		if !ok {
-			log.Println("No camera input found", input)
+			log.Println("No camera input found", inputValue)
 			return nil
 		}
+		// input := inputValue.(string)
 
 		// cmd := exec.Command("ffmpeg")
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
