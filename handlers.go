@@ -206,7 +206,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 
 		fmt.Println("Prepared command", cmd)
 
-		_, err = c.bot.SendMessage(userId, "Recording is started", &gotgbot.SendMessageOpts{})
+		msgRecStarted, err := c.bot.SendMessage(userId, "Recording is started", &gotgbot.SendMessageOpts{})
 		if err != nil {
 			return err
 		}
@@ -235,6 +235,8 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to send file %w", err)
 		}
+
+		msgRecStarted.Delete(c.bot, &gotgbot.DeleteMessageOpts{})
 
 		err = os.Remove(filePath)
 		if err != nil {
