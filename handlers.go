@@ -3,8 +3,11 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"io"
 	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
@@ -207,6 +210,26 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		_, err = cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("failed to record: %w", err)
+		}
+
+		file, err := os.Open(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to read file %w", err)
+		}
+
+		reader := (io.Reader)(file)
+		_, err = c.bot.SendVideo(
+			userId,
+			gotgbot.InputFileByReader(filepath.Base(filePath), reader),
+			&gotgbot.SendVideoOpts{},
+		)
+		if err != nil {
+			return fmt.Errorf("failed to send file %w", err)
+		}
+
+		err = os.Remove(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to delete file %w", err)
 		}
 
 		return nil
