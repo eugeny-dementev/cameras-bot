@@ -130,12 +130,26 @@ func RecordCmd(c *HandlerContext) error {
 
 func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
+		timeRangeButtons := make([]gotgbot.InlineKeyboardButton, 0)
+
+		for _, timeRange := range TimeRanges {
+			timeRangeButtons = append(timeRangeButtons, gotgbot.InlineKeyboardButton{
+				Text:         timeRange,
+				CallbackData: prepareCallbackHood(timeRange),
+			})
+		}
+
 		// cq := c.ctx.CallbackQuery
 		fmt.Println("Camera chosen for recording:", config.Tag)
 		_, err := c.bot.SendMessage(
 			c.ctx.EffectiveUser.Id,
 			fmt.Sprintf("Chose time range for %v camera recording", config.Name),
-			&gotgbot.SendMessageOpts{},
+			&gotgbot.SendMessageOpts{
+				ParseMode: "html",
+				ReplyMarkup: gotgbot.InlineKeyboardMarkup{
+					InlineKeyboard: [][]gotgbot.InlineKeyboardButton{timeRangeButtons},
+				},
+			},
 		)
 		if err != nil {
 			return fmt.Errorf("failed to send record_callback response: %w", err)
