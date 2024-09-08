@@ -28,7 +28,9 @@ func main() {
 		app.AddCallback(callback, RecordTagCallbackFactory(cameraConfig))
 	}
 
-	app.AddCallback(prepareCallbackHood("action"), RecordTimeCallback)
+	for _, timeRange := range TimeRanges {
+		app.AddCallback(prepareCallbackHood("action"), RecordTimeCallbackFactory(timeRange))
+	}
 
 	err = app.Start()
 	if err != nil {
