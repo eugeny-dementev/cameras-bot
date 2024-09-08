@@ -173,9 +173,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		userId := c.ctx.EffectiveUser.Id
 
 		cq := c.ctx.CallbackQuery
-		cq.Answer(c.bot, &gotgbot.AnswerCallbackQueryOpts{
-			Text: timeRange,
-		})
+		cq.Answer(c.bot, &gotgbot.AnswerCallbackQueryOpts{})
 
 		inputValue, ok := c.app.state.Get(userId, "record_input_url")
 		input := inputValue.(string)
