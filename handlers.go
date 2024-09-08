@@ -225,7 +225,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 
 		_, err = c.bot.SendVideo(
 			userId,
-			gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewBuffer(buffer)),
+			gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewReader(buffer)),
 			&gotgbot.SendVideoOpts{},
 		)
 		if err != nil {
