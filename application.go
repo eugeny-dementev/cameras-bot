@@ -18,6 +18,7 @@ type Application struct {
 	tgBotDispatcher *ext.Dispatcher
 	tgBotUpdater    *ext.Updater
 	config          Config
+	state           *State
 }
 
 func (a *Application) Init() error {
@@ -37,6 +38,9 @@ func (a *Application) Init() error {
 	if err != nil {
 		return err
 	}
+
+  a.state = &State{}
+  a.state.Setup()
 
 	a.initTgBotDispather()
 
