@@ -130,15 +130,6 @@ func RecordCmd(c *HandlerContext) error {
 
 func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
-		// cmd := exec.Command("ffmpeg")
-		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
-		//cmd.Args = append(
-		//	cmd.Args,
-		//  "-t", "00:00:05",
-		//  "-i", config.Stream(),
-		//  "./room.mp4",
-		//)
-
 		// cq := c.ctx.CallbackQuery
 		fmt.Println("Callback query data:", config.Tag)
 		_, err := c.bot.SendMessage(
@@ -164,6 +155,15 @@ func RecordTimeCallbackFactory(timerange string) func(c *HandlerContext) error {
 			log.Println("No camera input found", input)
 			return nil
 		}
+
+		// cmd := exec.Command("ffmpeg")
+		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
+		//cmd.Args = append(
+		//	cmd.Args,
+		//  "-t", "00:00:05",
+		//  "-i", config.Stream(),
+		//  "./room.mp4",
+		//)
 
 		return nil
 	}
