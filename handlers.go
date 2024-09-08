@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os/exec"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
@@ -180,16 +181,23 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			log.Println("No camera input found", inputValue)
 			return nil
 		}
-		// input := inputValue.(string)
+		input := inputValue.(string)
 
-		// cmd := exec.Command("ffmpeg")
+		filePath, err := c.app.config.GetTmpRecordingPath(userId, input)
+		if err != nil {
+			return err
+		}
+
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
-		//cmd.Args = append(
-		//	cmd.Args,
-		//  "-t", "00:00:05",
-		//  "-i", config.Stream(),
-		//  "./room.mp4",
-		//)
+		cmd := exec.Command("ffmpeg")
+		cmd.Args = append(
+			cmd.Args,
+			"-t", fmt.Sprintf("00:00:%v", timeRange),
+			"-i", input,
+			filePath,
+		)
+
+		fmt.Println("Prepared command", cmd)
 
 		return nil
 	}
