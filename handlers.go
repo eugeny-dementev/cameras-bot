@@ -214,6 +214,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		if err != nil {
 			return err
 		}
+		defer msgRecStarted.Delete(c.bot, &gotgbot.DeleteMessageOpts{})
 
 		_, err = cmd.CombinedOutput()
 		if err != nil {
@@ -242,8 +243,6 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to send file %w", err)
 		}
-
-		msgRecStarted.Delete(c.bot, &gotgbot.DeleteMessageOpts{})
 
 		err = os.Remove(filePath)
 		if err != nil {
