@@ -12,13 +12,13 @@ import (
 )
 
 type Application struct {
-	cameras         Cameras
 	tgClient        *tg.Client
 	tgBot           *gotgbot.Bot
 	tgBotDispatcher *ext.Dispatcher
 	tgBotUpdater    *ext.Updater
-	config          Config
 	state           *State
+	cameras         Cameras
+	config          Config
 }
 
 func (a *Application) Init() error {
