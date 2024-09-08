@@ -199,6 +199,11 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 
 		fmt.Println("Prepared command", cmd)
 
+		_, err = cmd.CombinedOutput()
+		if err != nil {
+      return fmt.Errorf("failed to record: %w", err)
+		}
+
 		return nil
 	}
 }
