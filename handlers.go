@@ -136,6 +136,8 @@ func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error
 	return func(c *HandlerContext) error {
 		log.Println("Camera chosen", config.Name)
 
+		c.ctx.EffectiveMessage.Delete(c.bot, &gotgbot.DeleteMessageOpts{})
+
 		timeRangeButtons := make([]gotgbot.InlineKeyboardButton, 0)
 
 		for _, timeRange := range TimeRanges {
@@ -178,6 +180,8 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 
 		cq := c.ctx.CallbackQuery
 		cq.Answer(c.bot, &gotgbot.AnswerCallbackQueryOpts{})
+
+		c.ctx.EffectiveMessage.Delete(c.bot, &gotgbot.DeleteMessageOpts{})
 
 		inputValue, ok := c.app.state.Get(userId, "record_input_url")
 		if !ok {
