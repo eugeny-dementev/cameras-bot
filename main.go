@@ -29,7 +29,7 @@ func main() {
 	}
 
 	for _, timeRange := range TimeRanges {
-		app.AddCallback(prepareCallbackHood("action"), RecordTimeCallbackFactory(timeRange))
+		app.AddCallback(prepareCallbackHood(timeRange), RecordTimeCallbackFactory(timeRange))
 	}
 
 	err = app.Start()
