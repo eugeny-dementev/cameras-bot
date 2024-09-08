@@ -141,6 +141,10 @@ func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error
 
 		cq := c.ctx.CallbackQuery
 		cq.Answer(c.bot, &gotgbot.AnswerCallbackQueryOpts{})
+
+		userId := c.ctx.EffectiveUser.Id
+		c.app.state.Set(userId, "record_input_url", config.Stream())
+
 		fmt.Println("Camera chosen for recording:", config.Tag)
 		_, err := c.bot.SendMessage(
 			c.ctx.EffectiveUser.Id,
