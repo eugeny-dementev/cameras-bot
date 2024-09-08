@@ -131,10 +131,10 @@ func RecordCmd(c *HandlerContext) error {
 func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
 		// cq := c.ctx.CallbackQuery
-		fmt.Println("Callback query data:", config.Tag)
+		fmt.Println("Camera chosen for recording:", config.Tag)
 		_, err := c.bot.SendMessage(
 			c.ctx.EffectiveUser.Id,
-			fmt.Sprintf("Recording started for %v", config.Name),
+			fmt.Sprintf("Chose time range for %v camera recording", config.Name),
 			&gotgbot.SendMessageOpts{},
 		)
 		if err != nil {
