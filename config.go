@@ -113,7 +113,7 @@ func (c *CameraConfig) Image() string {
 
 func (c *CameraConfig) Stream() string {
 	url := url.URL{
-		Scheme: "http",
+		Scheme: "rtsp",
 		Host:   fmt.Sprintf("%v:%v", c.Host, 554),
 		User:   url.UserPassword(c.User, c.Pass),
 		Path:   "ISAPI/Streaming/Channels/101",
