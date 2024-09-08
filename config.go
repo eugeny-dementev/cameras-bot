@@ -35,13 +35,15 @@ func (c *Config) GetConfigPath() (string, error) {
 	return path.Join(userHomeDir, ".config/cameras-bot"), nil
 }
 
-func (c *Config) GetTmpRecordingPath(userId int64, randomTag string) (string, error) {
+func (c *Config) GetTmpRecordingPath(userId int64, hashSeed string) (string, error) {
 	configDir, err := c.GetConfigPath()
 	if err != nil {
 		return "", err
 	}
 
-	fileName := fmt.Sprintf("%v_%v.mp4", userId, randomTag)
+	hash := hashify([]byte(hashSeed))
+
+	fileName := fmt.Sprintf("%v_%v.mp4", userId, hash)
 
 	return path.Join(configDir, fileName), nil
 }
