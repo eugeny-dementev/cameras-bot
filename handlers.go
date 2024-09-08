@@ -130,6 +130,8 @@ func RecordCmd(c *HandlerContext) error {
 
 func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
+		log.Println("Camera chosen", config.Name)
+
 		timeRangeButtons := make([]gotgbot.InlineKeyboardButton, 0)
 
 		for _, timeRange := range TimeRanges {
@@ -164,8 +166,10 @@ func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error
 	}
 }
 
-func RecordTimeCallbackFactory(timerange string) func(c *HandlerContext) error {
+func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
+		log.Println("Time range chosen", timeRange)
+
 		userId := c.ctx.EffectiveUser.Id
 
 		cq := c.ctx.CallbackQuery
