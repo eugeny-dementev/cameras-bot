@@ -27,6 +27,12 @@ type State struct {
 	// - helper methods for retrieving/caching chat settings
 }
 
+func (c *State) Setup() {
+	if c.userData == nil {
+		c.userData = map[int64]map[string]any{}
+	}
+}
+
 func (c *State) Get(userId int64, key string) (any, bool) {
 	c.rwMux.RLock()
 	defer c.rwMux.RUnlock()
@@ -47,10 +53,6 @@ func (c *State) Get(userId int64, key string) (any, bool) {
 func (c *State) Set(userId int64, key string, val any) {
 	c.rwMux.Lock()
 	defer c.rwMux.Unlock()
-
-	if c.userData == nil {
-		c.userData = map[int64]map[string]any{}
-	}
 
 	_, ok := c.userData[userId]
 	if !ok {
