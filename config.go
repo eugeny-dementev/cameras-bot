@@ -9,6 +9,8 @@ import (
 	"path"
 )
 
+var TimeRanges = []string{"05", "15", "30", "60"}
+
 type Config struct {
 	AppHash     string              `json:"app_hash"`
 	BotToken    string              `json:"bot_token"`
