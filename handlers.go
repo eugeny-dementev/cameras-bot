@@ -195,6 +195,10 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			return err
 		}
 
+		if _, err := os.Stat(filePath); err == nil {
+			os.Remove(filePath)
+		}
+
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
 		cmd := exec.Command("ffmpeg")
 		cmd.Args = append(
