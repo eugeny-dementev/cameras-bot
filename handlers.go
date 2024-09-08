@@ -218,17 +218,24 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		}
 		defer file.Close()
 
-		reader := (io.Reader)(file)
+		buffer, err := io.ReadAll(io.Reader(file))
+		if err != nil {
+			return fmt.Errorf("failed to read file: %w", err)
+		}
+
 		_, err = c.bot.SendVideo(
 			userId,
-			gotgbot.InputFileByReader(filepath.Base(filePath), reader),
+			gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewBuffer(buffer)),
 			&gotgbot.SendVideoOpts{},
 		)
 		if err != nil {
 			return fmt.Errorf("failed to send file %w", err)
 		}
 
-		defer os.Remove(filePath)
+		err = os.Remove(filePath)
+		if err != nil {
+			return fmt.Errorf("failed to remove file: %w", err)
+		}
 
 		return nil
 	}
