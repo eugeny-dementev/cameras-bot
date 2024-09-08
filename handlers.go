@@ -216,6 +216,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to read file %w", err)
 		}
+		defer file.Close()
 
 		reader := (io.Reader)(file)
 		_, err = c.bot.SendVideo(
@@ -227,10 +228,7 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			return fmt.Errorf("failed to send file %w", err)
 		}
 
-		err = os.Remove(filePath)
-		if err != nil {
-			return fmt.Errorf("failed to delete file %w", err)
-		}
+		defer os.Remove(filePath)
 
 		return nil
 	}
