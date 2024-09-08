@@ -153,6 +153,10 @@ func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error
 	}
 }
 
+func RecordTimeCallback(c *HandlerContext) error {
+	return nil
+}
+
 func prepareCallbackHood(tag string) string {
 	return fmt.Sprintf("record_callback_%v", tag)
 }

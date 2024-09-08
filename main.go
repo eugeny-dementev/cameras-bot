@@ -28,6 +28,8 @@ func main() {
 		app.AddCallback(callback, RecordTagCallbackFactory(cameraConfig))
 	}
 
+	app.AddCallback(prepareCallbackHood("action"), RecordTimeCallback)
+
 	err = app.Start()
 	if err != nil {
 		panic(err)
