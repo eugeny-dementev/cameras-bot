@@ -1,6 +1,8 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/fs"
@@ -125,4 +127,11 @@ type CameraPermissions struct {
 
 func (p CameraPermissions) String() string {
 	return fmt.Sprintf("{UserId: %v, Tags: %v}", p.UserId, p.Tags)
+}
+
+func hashify(bytes []byte) string {
+	hasher := sha1.New()
+	hasher.Write(bytes)
+
+	return base64.URLEncoding.EncodeToString(hasher.Sum(nil))
 }
