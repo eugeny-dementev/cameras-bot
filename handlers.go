@@ -127,7 +127,7 @@ func RecordCmd(c *HandlerContext) error {
 	return nil
 }
 
-func RecordCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
+func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error {
 	return func(c *HandlerContext) error {
 		// cmd := exec.Command("ffmpeg")
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"

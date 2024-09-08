@@ -25,7 +25,7 @@ func main() {
 
 	for _, cameraConfig := range app.config.Cameras {
 		callback := prepareCallbackHood(cameraConfig.Tag)
-		app.AddCallback(callback, RecordCallbackFactory(cameraConfig))
+		app.AddCallback(callback, RecordTagCallbackFactory(cameraConfig))
 	}
 
 	err = app.Start()
