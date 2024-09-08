@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"log"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
@@ -153,8 +154,19 @@ func RecordTagCallbackFactory(config CameraConfig) func(c *HandlerContext) error
 	}
 }
 
-func RecordTimeCallback(c *HandlerContext) error {
-	return nil
+func RecordTimeCallbackFactory(timerange string) func(c *HandlerContext) error {
+	return func(c *HandlerContext) error {
+		userId := c.ctx.EffectiveUser.Id
+
+		inputValue, ok := c.app.state.Get(userId, "record_input_url")
+		input := inputValue.(string)
+		if !ok {
+			log.Println("No camera input found", input)
+			return nil
+		}
+
+		return nil
+	}
 }
 
 func prepareCallbackHood(tag string) string {
