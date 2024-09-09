@@ -61,9 +61,9 @@ func (a *Application) Start() error {
 	a.tgBotUpdater.StartPolling(a.tgBot, &ext.PollingOpts{
 		DropPendingUpdates: true,
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
-			Timeout: 9,
+			Timeout: 30,
 			RequestOpts: &gotgbot.RequestOpts{
-				Timeout: time.Second * 10,
+				Timeout: time.Second * 30,
 			},
 		},
 	})
