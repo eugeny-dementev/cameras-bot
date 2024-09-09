@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
 )
@@ -242,6 +243,9 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 				&gotgbot.SendVideoOpts{
 					DisableNotification: true,
 					ProtectContent:      true,
+					RequestOpts: &gotgbot.RequestOpts{
+						Timeout: time.Second * 30,
+					},
 				},
 			)
 
