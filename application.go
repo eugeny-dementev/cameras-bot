@@ -137,7 +137,11 @@ func (a *Application) initTgClient() error {
 }
 
 func (a *Application) initTgBot() error {
-	bot, err := gotgbot.NewBot(a.config.BotToken, nil)
+	bot, err := gotgbot.NewBot(a.config.BotToken, &gotgbot.BotOpts{
+		RequestOpts: &gotgbot.RequestOpts{
+			Timeout: time.Second * 30,
+		},
+	})
 	if err != nil {
 		return err
 	}
