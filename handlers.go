@@ -224,27 +224,36 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			return fmt.Errorf("failed to record: %w", err)
 		}
 
-		file, err := os.Open(filePath)
-		if err != nil {
-			return fmt.Errorf("failed to read file %w", err)
-		}
-		defer file.Close()
+		for step := range 3 {
+			file, err := os.Open(filePath)
+			if err != nil {
+				return fmt.Errorf("failed to read file %w", err)
+			}
 
-		buffer, err := io.ReadAll(io.Reader(file))
-		if err != nil {
-			return fmt.Errorf("failed to read file: %w", err)
-		}
+			buffer, err := io.ReadAll(io.Reader(file))
+			if err != nil {
+				return fmt.Errorf("failed to read file: %w", err)
+			}
+			file.Close()
 
-		_, err = c.bot.SendVideo(
-			userId,
-			gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewReader(buffer)),
-			&gotgbot.SendVideoOpts{
-				DisableNotification: true,
-				ProtectContent:      true,
-			},
-		)
-		if err != nil {
-			return fmt.Errorf("failed to send file %w", err)
+			_, err = c.bot.SendVideo(
+				userId,
+				gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewReader(buffer)),
+				&gotgbot.SendVideoOpts{
+					DisableNotification: true,
+					ProtectContent:      true,
+				},
+			)
+
+			log.Println("ERR", err)
+
+			if err == nil {
+				break
+			} else if step == 3 {
+				return fmt.Errorf("failed to send file %w", err)
+			} else {
+				log.Println(fmt.Errorf("failed to send file %w", err))
+			}
 		}
 
 		err = os.Remove(filePath)
