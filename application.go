@@ -39,8 +39,8 @@ func (a *Application) Init() error {
 		return err
 	}
 
-  a.state = &State{}
-  a.state.Setup()
+	a.state = &State{}
+	a.state.Setup()
 
 	a.initTgBotDispather()
 
@@ -59,9 +59,9 @@ func (a *Application) Start() error {
 	}
 
 	a.tgBotUpdater.StartPolling(a.tgBot, &ext.PollingOpts{
-		DropPendingUpdates: true,
+		DropPendingUpdates: false,
 		GetUpdatesOpts: &gotgbot.GetUpdatesOpts{
-			Timeout: 30,
+			Timeout: 29,
 			RequestOpts: &gotgbot.RequestOpts{
 				Timeout: time.Second * 30,
 			},
