@@ -101,6 +101,9 @@ func AllCmd(c *HandlerContext) error {
 	_, err = c.bot.SendMediaGroup(c.ctx.EffectiveChat.Id, albumMedias, &gotgbot.SendMediaGroupOpts{
 		DisableNotification: true,
 		ProtectContent:      true,
+		RequestOpts: &gotgbot.RequestOpts{
+			Timeout: time.Second * 30,
+		},
 	})
 	if err != nil {
 		return err
