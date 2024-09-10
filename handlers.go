@@ -203,11 +203,18 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			os.Remove(filePath)
 		}
 
+		var timeArg string
+		if timeRange == "60" {
+			timeArg = "00:01:00"
+		} else {
+			timeArg = fmt.Sprintf("00:00:%v", timeRange)
+		}
+
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
 		cmd := exec.Command("ffmpeg")
 		cmd.Args = append(
 			cmd.Args,
-			"-t", fmt.Sprintf("00:00:%v", timeRange),
+			"-t", timeArg,
 			"-i", input,
 			filePath,
 		)
