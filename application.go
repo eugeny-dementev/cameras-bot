@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -86,6 +87,15 @@ func (a *Application) Idle() {
 func (app *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
 	app.tgBotDispatcher.AddHandler(handlers.NewCommand(name, func(bot *gotgbot.Bot, ctx *ext.Context) error {
 		log.Println("Command is run", name)
+
+		if ctx.EffectiveUser.Id != app.config.AdminId {
+			bot.SendMessage(
+				app.config.AdminId,
+				fmt.Sprintf("@%v run /%v command", ctx.EffectiveUser.Username, name),
+				&gotgbot.SendMessageOpts{},
+			)
+		}
+
 		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
 		if permissions == nil {
 			return nil
@@ -104,6 +114,15 @@ func (app *Application) AddCommand(name string, handler func(context *HandlerCon
 func (app *Application) AddCallback(callback string, handler func(context *HandlerContext) error) {
 	app.tgBotDispatcher.AddHandler(handlers.NewCallback(callbackquery.Equal(callback), func(bot *gotgbot.Bot, ctx *ext.Context) error {
 		log.Println("Callback is run", callback)
+
+		if ctx.EffectiveUser.Id != app.config.AdminId {
+			bot.SendMessage(
+				app.config.AdminId,
+				fmt.Sprintf("@%v run /%v callback", ctx.EffectiveUser.Username, callback),
+				&gotgbot.SendMessageOpts{},
+			)
+		}
+
 		permissions := app.config.GetPermissionsFor(ctx.EffectiveUser.Id)
 		if permissions == nil {
 			return nil
