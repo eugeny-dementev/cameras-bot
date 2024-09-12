@@ -118,7 +118,7 @@ func (app *Application) AddCallback(callback string, handler func(context *Handl
 		if ctx.EffectiveUser.Id != app.config.AdminId {
 			bot.SendMessage(
 				app.config.AdminId,
-				fmt.Sprintf("@%v run /%v callback", ctx.EffectiveUser.Username, callback),
+				fmt.Sprintf("@%v run %v callback", ctx.EffectiveUser.Username, callback),
 				&gotgbot.SendMessageOpts{},
 			)
 		}
