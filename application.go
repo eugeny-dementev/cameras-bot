@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"eugeny-dementev.github.io/cameras-bot/ntgcalls"
 	"github.com/PaulSonOfLars/gotgbot/v2"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext"
 	"github.com/PaulSonOfLars/gotgbot/v2/ext/handlers"
@@ -14,6 +15,7 @@ import (
 
 type Application struct {
 	tgClient        *tg.Client
+	ntgClient       *ntgcalls.Client
 	tgBot           *gotgbot.Bot
 	tgBotDispatcher *ext.Dispatcher
 	tgBotUpdater    *ext.Updater
@@ -44,6 +46,8 @@ func (a *Application) Init() error {
 	a.state.Setup()
 
 	a.initTgBotDispather()
+
+	a.ntgClient = ntgcalls.NTgCalls()
 
 	return nil
 }
@@ -136,6 +140,9 @@ func (app *Application) AddCallback(callback string, handler func(context *Handl
 
 		return nil
 	}))
+}
+
+func (a *Application) VideoCall() {
 }
 
 func (a *Application) initTgClient() error {
