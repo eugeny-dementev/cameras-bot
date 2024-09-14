@@ -276,6 +276,15 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 	}
 }
 
+func CallCmd(c *HandlerContext) error {
+  cameraConfig := c.app.config.Cameras[0]
+  stream := cameraConfig.Stream()
+
+  c.app.VideoCall(stream, fmt.Sprintf("@%v", c.ctx.EffectiveUser.Username))
+
+  return nil
+}
+
 func prepareCallbackHood(tag string) string {
 	return fmt.Sprintf("record_callback_%v", tag)
 }
