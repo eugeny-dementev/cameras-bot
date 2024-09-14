@@ -21,6 +21,7 @@ func main() {
 	app.AddCommand("start", StartCmd)
 	app.AddCommand("about", AboutCmd)
 	app.AddCommand("all", AllCmd)
+	app.AddCommand("call", CallCmd)
 	app.AddCommand("record", RecordCmd)
 
 	for _, cameraConfig := range app.config.Cameras {
