@@ -86,6 +86,7 @@ func (a *Application) Start() error {
 func (a *Application) Idle() {
 	a.tgClient.Idle()
 	a.tgBotUpdater.Idle()
+	a.ntgClient.Free()
 }
 
 func (app *Application) AddCommand(name string, handler func(context *HandlerContext) error) {
