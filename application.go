@@ -15,6 +15,7 @@ import (
 
 type Application struct {
 	tgClient        *tg.Client
+	tgInputCall     *tg.InputPhoneCall
 	ntgClient       *ntgcalls.Client
 	tgBot           *gotgbot.Bot
 	tgBotDispatcher *ext.Dispatcher
