@@ -144,7 +144,107 @@ func (app *Application) AddCallback(callback string, handler func(context *Handl
 	}))
 }
 
-func (a *Application) VideoCall() {
+func (a *Application) VideoCall(stream, username string) {
+	fmt.Println("Calls:", a.ntgClient.Calls())
+	videoInput := fmt.Sprintf("ffmpeg -i %s -loglevel panic -f rawvideo -r 24 -pix_fmt yuv420p -vf scale=1920:1080 pipe:1", stream)
+	fmt.Println(videoInput)
+	rawUser, _ := a.tgClient.ResolveUsername(username)
+	user := rawUser.(*tg.UserObj)
+	dhConfigRaw, _ := a.tgClient.MessagesGetDhConfig(0, 256)
+	dhConfig := dhConfigRaw.(*tg.MessagesDhConfigObj)
+	gAHash, _ := a.ntgClient.CreateP2PCall(user.ID, ntgcalls.DhConfig{
+		G:      dhConfig.G,
+		P:      dhConfig.P,
+		Random: dhConfig.Random,
+	}, nil, ntgcalls.MediaDescription{
+		Video: &ntgcalls.VideoDescription{
+			InputMode: ntgcalls.InputModeShell,
+			Input:     videoInput,
+			Width:     1920,
+			Height:    1080,
+			Fps:       24,
+		},
+	})
+
+	protocolRaw := a.ntgClient.GetProtocol()
+	protocol := &tg.PhoneCallProtocol{
+		UdpP2P:          protocolRaw.UdpP2P,
+		UdpReflector:    protocolRaw.UdpReflector,
+		MinLayer:        protocolRaw.MinLayer,
+		MaxLayer:        protocolRaw.MaxLayer,
+		LibraryVersions: protocolRaw.Versions,
+	}
+	_, _ = a.tgClient.PhoneRequestCall(
+		&tg.PhoneRequestCallParams{
+			Protocol: protocol,
+			UserID:   &tg.InputUserObj{UserID: user.ID, AccessHash: user.AccessHash},
+			GAHash:   gAHash,
+			RandomID: int32(tg.GenRandInt()),
+		},
+	)
+
+	a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
+		phoneCall := m.(*tg.UpdatePhoneCall).PhoneCall
+		switch phoneCall.(type) {
+		case *tg.PhoneCallAccepted:
+			call := phoneCall.(*tg.PhoneCallAccepted)
+			res, _ := a.ntgClient.ExchangeKeys(user.ID, call.GB, 0)
+			a.tgInputCall = &tg.InputPhoneCall{
+				ID:         call.ID,
+				AccessHash: call.AccessHash,
+			}
+			a.ntgClient.OnSignal(func(chatId int64, signal []byte) {
+				_, _ = a.tgClient.PhoneSendSignalingData(a.tgInputCall, signal)
+			})
+			callConfirmRes, _ := a.tgClient.PhoneConfirmCall(
+				a.tgInputCall,
+				res.GAOrB,
+				res.KeyFingerprint,
+				protocol,
+			)
+			callRes := callConfirmRes.PhoneCall.(*tg.PhoneCallObj)
+			rtcServers := make([]ntgcalls.RTCServer, len(callRes.Connections))
+			for i, connection := range callRes.Connections {
+				switch connection.(type) {
+				case *tg.PhoneConnectionWebrtc:
+					rtcServer := connection.(*tg.PhoneConnectionWebrtc)
+					rtcServers[i] = ntgcalls.RTCServer{
+						ID:       rtcServer.ID,
+						Ipv4:     rtcServer.Ip,
+						Ipv6:     rtcServer.Ipv6,
+						Username: rtcServer.Username,
+						Password: rtcServer.Password,
+						Port:     rtcServer.Port,
+						Turn:     rtcServer.Turn,
+						Stun:     rtcServer.Stun,
+					}
+				case *tg.PhoneConnectionObj:
+					phoneServer := connection.(*tg.PhoneConnectionObj)
+					rtcServers[i] = ntgcalls.RTCServer{
+						ID:      phoneServer.ID,
+						Ipv4:    phoneServer.Ip,
+						Ipv6:    phoneServer.Ipv6,
+						Port:    phoneServer.Port,
+						Turn:    true,
+						Tcp:     phoneServer.Tcp,
+						PeerTag: phoneServer.PeerTag,
+					}
+				}
+			}
+			_ = a.ntgClient.ConnectP2P(user.ID, rtcServers, callRes.Protocol.LibraryVersions, callRes.P2PAllowed)
+		case *tg.PhoneCallDiscarded:
+			call := phoneCall.(*tg.PhoneCallDiscarded)
+			fmt.Println("PhoneCallDiscarded reason", call.Reason, call.Reason.String())
+      a.tgInputCall = nil
+		}
+		return nil
+	})
+
+	a.tgClient.AddRawHandler(&tg.UpdatePhoneCallSignalingData{}, func(m tg.Update, c *tg.Client) error {
+		signalingData := m.(*tg.UpdatePhoneCallSignalingData).Data
+		_ = a.ntgClient.SendSignalingData(user.ID, signalingData)
+		return nil
+	})
 }
 
 func (a *Application) initTgClient() error {
