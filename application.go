@@ -147,7 +147,6 @@ func (app *Application) AddCallback(callback string, handler func(context *Handl
 func (a *Application) VideoCall(stream, username string) {
 	fmt.Println("Calls:", a.ntgClient.Calls())
 	videoInput := fmt.Sprintf("ffmpeg -i %s -loglevel panic -f rawvideo -r 24 -pix_fmt yuv420p -vf scale=1920:1080 pipe:1", stream)
-	fmt.Println(videoInput)
 	rawUser, _ := a.tgClient.ResolveUsername(username)
 	user := rawUser.(*tg.UserObj)
 	dhConfigRaw, _ := a.tgClient.MessagesGetDhConfig(0, 256)
