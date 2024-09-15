@@ -147,15 +147,14 @@ func (app *Application) AddCallback(callback string, handler func(context *Handl
 func (a *Application) VideoCall(stream, username string) {
 	fmt.Println("Calls:", a.ntgClient.Calls())
 	videoInput := fmt.Sprintf("ffmpeg -i %s -loglevel panic -f rawvideo -r 24 -pix_fmt yuv420p -vf scale=1920:1080 pipe:1", stream)
+
 	rawUser, _ := a.tgClient.ResolveUsername(username)
 	user := rawUser.(*tg.UserObj)
+
 	dhConfigRaw, _ := a.tgClient.MessagesGetDhConfig(0, 256)
 	dhConfig := dhConfigRaw.(*tg.MessagesDhConfigObj)
-	gAHash, _ := a.ntgClient.CreateP2PCall(user.ID, ntgcalls.DhConfig{
-		G:      dhConfig.G,
-		P:      dhConfig.P,
-		Random: dhConfig.Random,
-	}, nil, ntgcalls.MediaDescription{
+
+	gDesc := ntgcalls.MediaDescription{
 		Video: &ntgcalls.VideoDescription{
 			InputMode: ntgcalls.InputModeShell,
 			Input:     videoInput,
@@ -163,7 +162,13 @@ func (a *Application) VideoCall(stream, username string) {
 			Height:    1080,
 			Fps:       24,
 		},
-	})
+	}
+
+	gAHash, _ := a.ntgClient.CreateP2PCall(user.ID, ntgcalls.DhConfig{
+		G:      dhConfig.G,
+		P:      dhConfig.P,
+		Random: dhConfig.Random,
+	}, nil, gDesc)
 
 	protocolRaw := a.ntgClient.GetProtocol()
 	protocol := &tg.PhoneCallProtocol{
@@ -173,6 +178,7 @@ func (a *Application) VideoCall(stream, username string) {
 		MaxLayer:        protocolRaw.MaxLayer,
 		LibraryVersions: protocolRaw.Versions,
 	}
+
 	_, _ = a.tgClient.PhoneRequestCall(
 		&tg.PhoneRequestCallParams{
 			Protocol: protocol,
@@ -234,7 +240,7 @@ func (a *Application) VideoCall(stream, username string) {
 		case *tg.PhoneCallDiscarded:
 			call := phoneCall.(*tg.PhoneCallDiscarded)
 			fmt.Println("PhoneCallDiscarded reason", call.Reason, call.Reason.String())
-      a.tgInputCall = nil
+			a.tgInputCall = nil
 		}
 		return nil
 	})
