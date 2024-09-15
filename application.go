@@ -239,7 +239,7 @@ func (a *Application) VideoCall(stream, username string) {
 			_ = a.ntgClient.ConnectP2P(user.ID, rtcServers, callRes.Protocol.LibraryVersions, callRes.P2PAllowed)
 		case *tg.PhoneCallDiscarded:
 			call := phoneCall.(*tg.PhoneCallDiscarded)
-			fmt.Println("PhoneCallDiscarded reason", call.Reason, call.Reason.String())
+			fmt.Println("PhoneCallDiscarded reason", call.Reason)
 			a.tgInputCall = nil
 		}
 		return nil
