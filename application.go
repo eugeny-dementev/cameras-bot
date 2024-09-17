@@ -188,7 +188,10 @@ func (a *Application) VideoCall(stream, username string) {
 		},
 	)
 
-	a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
+	var callHandle tg.Handle
+	var dataHandle tg.Handle
+
+	callHandle = a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
 		phoneCall := m.(*tg.UpdatePhoneCall).PhoneCall
 		switch phoneCall.(type) {
 		case *tg.PhoneCallAccepted:
@@ -240,12 +243,32 @@ func (a *Application) VideoCall(stream, username string) {
 		case *tg.PhoneCallDiscarded:
 			call := phoneCall.(*tg.PhoneCallDiscarded)
 			fmt.Println("PhoneCallDiscarded reason", call.Reason)
+
+			if callHandle != nil {
+				err := a.tgClient.RemoveHandle(callHandle)
+				if err != nil {
+					log.Fatal("Failed to remove handle for the call", err)
+				} else {
+					fmt.Println("Removed handle for the call")
+				}
+				callHandle = nil
+			}
+			if dataHandle != nil {
+				err := a.tgClient.RemoveHandle(dataHandle)
+				if err != nil {
+					log.Fatal("Failed to remove handle for the data", err)
+				} else {
+					fmt.Println("Removed handle for the data")
+				}
+				dataHandle = nil
+			}
+
 			a.tgInputCall = nil
 		}
 		return nil
 	})
 
-	a.tgClient.AddRawHandler(&tg.UpdatePhoneCallSignalingData{}, func(m tg.Update, c *tg.Client) error {
+	dataHandle = a.tgClient.AddRawHandler(&tg.UpdatePhoneCallSignalingData{}, func(m tg.Update, c *tg.Client) error {
 		signalingData := m.(*tg.UpdatePhoneCallSignalingData).Data
 		_ = a.ntgClient.SendSignalingData(user.ID, signalingData)
 		return nil
