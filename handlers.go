@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/PaulSonOfLars/gotgbot/v2"
@@ -232,6 +234,49 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 			return fmt.Errorf("failed to record: %w", err)
 		}
 
+		// ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0
+		// ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 file.mp4
+		probeCmd := exec.Command("ffprobe")
+		probeCmd.Args = append(
+			probeCmd.Args,
+			"-v", "error",
+			"-select_streams", "v:0",
+			"-show_entries",
+			"stream=width,height",
+			"-of", "csv=p=0",
+			filePath,
+		)
+
+		fmt.Println("Prepared command", probeCmd)
+
+		// var out bytes.Buffer
+		// cmd.Stdout = &out
+
+		probeOutput, err := probeCmd.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("failed to get video resolution probe: %v", err)
+		}
+
+		output := strings.TrimSpace(string(probeOutput))
+		resolution := strings.Split(output, ",")
+
+		var width int64 = 1920
+		var height int64 = 1080
+
+		if len(resolution) == 2 {
+			width, err = strconv.ParseInt(resolution[0], 10, 64)
+			if err != nil {
+				return fmt.Errorf("failed to parse video width resolution string: %v", err)
+			}
+
+			height, err = strconv.ParseInt(resolution[1], 10, 64)
+			if err != nil {
+				return fmt.Errorf("failed to parse video height resolution string: %v", err)
+			}
+		}
+
+		fmt.Printf("Parse video resolution: %vx%v\n", width, height)
+
 		for step := range 3 {
 			file, err := os.Open(filePath)
 			if err != nil {
@@ -248,6 +293,8 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 				userId,
 				gotgbot.InputFileByReader(filepath.Base(filePath), bytes.NewReader(buffer)),
 				&gotgbot.SendVideoOpts{
+					Width:               width,
+					Height:              height,
 					DisableNotification: true,
 					ProtectContent:      true,
 					RequestOpts: &gotgbot.RequestOpts{
@@ -277,12 +324,12 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 }
 
 func CallCmd(c *HandlerContext) error {
-  cameraConfig := c.app.config.Cameras[0]
-  stream := cameraConfig.Stream()
+	cameraConfig := c.app.config.Cameras[0]
+	stream := cameraConfig.Stream()
 
-  c.app.VideoCall(stream, fmt.Sprintf("@%v", c.ctx.EffectiveUser.Username))
+	c.app.VideoCall(stream, fmt.Sprintf("@%v", c.ctx.EffectiveUser.Username))
 
-  return nil
+	return nil
 }
 
 func prepareCallbackHood(tag string) string {
