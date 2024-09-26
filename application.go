@@ -229,9 +229,9 @@ func (a *Application) initCallHandlers() {
 			callRes := callConfirmRes.PhoneCall.(*tg.PhoneCallObj)
 			rtcServers := make([]ntgcalls.RTCServer, len(callRes.Connections))
 			for i, connection := range callRes.Connections {
-				switch connection.(type) {
+				switch connection := connection.(type) {
 				case *tg.PhoneConnectionWebrtc:
-					rtcServer := connection.(*tg.PhoneConnectionWebrtc)
+					rtcServer := connection
 					rtcServers[i] = ntgcalls.RTCServer{
 						ID:       rtcServer.ID,
 						Ipv4:     rtcServer.Ip,
@@ -243,7 +243,7 @@ func (a *Application) initCallHandlers() {
 						Stun:     rtcServer.Stun,
 					}
 				case *tg.PhoneConnectionObj:
-					phoneServer := connection.(*tg.PhoneConnectionObj)
+					phoneServer := connection
 					rtcServers[i] = ntgcalls.RTCServer{
 						ID:      phoneServer.ID,
 						Ipv4:    phoneServer.Ip,
