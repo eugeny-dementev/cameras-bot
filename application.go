@@ -20,6 +20,7 @@ type CallContext struct {
 
 type Application struct {
 	tgClient        *tg.Client
+	tgCallContext   *CallContext
 	tgInputCall     *tg.InputPhoneCall
 	ntgClient       *ntgcalls.Client
 	tgBot           *gotgbot.Bot
