@@ -185,7 +185,12 @@ func (a *Application) VideoCall(stream, username string) {
 		LibraryVersions: protocolRaw.Versions,
 	}
 
-	_, _ = a.tgClient.PhoneRequestCall(
+	a.tgCallContext = &CallContext{
+		protocol,
+		user,
+	}
+
+	_, err := a.tgClient.PhoneRequestCall(
 		&tg.PhoneRequestCallParams{
 			Protocol: protocol,
 			UserID:   &tg.InputUserObj{UserID: user.ID, AccessHash: user.AccessHash},
@@ -193,95 +198,15 @@ func (a *Application) VideoCall(stream, username string) {
 			RandomID: int32(tg.GenRandInt()),
 		},
 	)
+	if err != nil {
+		a.tgCallContext = nil
+		fmt.Println(fmt.Errorf("error while making call: %v", err))
+	}
 
-	var callHandle tg.Handle
-	var dataHandle tg.Handle
-
-	callHandle = a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
-		phoneCall := m.(*tg.UpdatePhoneCall).PhoneCall
-		switch phoneCall.(type) {
-		case *tg.PhoneCallAccepted:
-			call := phoneCall.(*tg.PhoneCallAccepted)
-			res, _ := a.ntgClient.ExchangeKeys(user.ID, call.GB, 0)
-			a.tgInputCall = &tg.InputPhoneCall{
-				ID:         call.ID,
-				AccessHash: call.AccessHash,
-			}
-			a.ntgClient.OnSignal(func(chatId int64, signal []byte) {
-				_, _ = a.tgClient.PhoneSendSignalingData(a.tgInputCall, signal)
-			})
-			callConfirmRes, _ := a.tgClient.PhoneConfirmCall(
-				a.tgInputCall,
-				res.GAOrB,
-				res.KeyFingerprint,
-				protocol,
-			)
-			callRes := callConfirmRes.PhoneCall.(*tg.PhoneCallObj)
-			rtcServers := make([]ntgcalls.RTCServer, len(callRes.Connections))
-			for i, connection := range callRes.Connections {
-				switch connection.(type) {
-				case *tg.PhoneConnectionWebrtc:
-					rtcServer := connection.(*tg.PhoneConnectionWebrtc)
-					rtcServers[i] = ntgcalls.RTCServer{
-						ID:       rtcServer.ID,
-						Ipv4:     rtcServer.Ip,
-						Ipv6:     rtcServer.Ipv6,
-						Username: rtcServer.Username,
-						Password: rtcServer.Password,
-						Port:     rtcServer.Port,
-						Turn:     rtcServer.Turn,
-						Stun:     rtcServer.Stun,
-					}
-				case *tg.PhoneConnectionObj:
-					phoneServer := connection.(*tg.PhoneConnectionObj)
-					rtcServers[i] = ntgcalls.RTCServer{
-						ID:      phoneServer.ID,
-						Ipv4:    phoneServer.Ip,
-						Ipv6:    phoneServer.Ipv6,
-						Port:    phoneServer.Port,
-						Turn:    true,
-						Tcp:     phoneServer.Tcp,
-						PeerTag: phoneServer.PeerTag,
-					}
-				}
-			}
-			_ = a.ntgClient.ConnectP2P(user.ID, rtcServers, callRes.Protocol.LibraryVersions, callRes.P2PAllowed)
-		case *tg.PhoneCallDiscarded:
-			call := phoneCall.(*tg.PhoneCallDiscarded)
-			fmt.Println("PhoneCallDiscarded reason", call.Reason)
-
-			if callHandle != nil {
-				err := a.tgClient.RemoveHandle(callHandle)
-				if err != nil {
-					log.Fatal("Failed to remove handle for the call", err)
-				} else {
-					fmt.Println("Removed handle for the call")
-				}
-				callHandle = nil
-			}
-			if dataHandle != nil {
-				err := a.tgClient.RemoveHandle(dataHandle)
-				if err != nil {
-					log.Fatal("Failed to remove handle for the data", err)
-				} else {
-					fmt.Println("Removed handle for the data")
-				}
-				dataHandle = nil
-			}
-
-			a.tgInputCall = nil
-		}
-		return nil
-	})
-
-	dataHandle = a.tgClient.AddRawHandler(&tg.UpdatePhoneCallSignalingData{}, func(m tg.Update, c *tg.Client) error {
-		signalingData := m.(*tg.UpdatePhoneCallSignalingData).Data
-		_ = a.ntgClient.SendSignalingData(user.ID, signalingData)
-		return nil
-	})
+	fmt.Println("Calls:", a.ntgClient.Calls())
 }
 
-func (a *Application) initCallHandler() {
+func (a *Application) initCallHandlers() {
 	a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
 		phoneCall := m.(*tg.UpdatePhoneCall).PhoneCall
 		switch phoneCall.(type) {
@@ -335,6 +260,7 @@ func (a *Application) initCallHandler() {
 			call := phoneCall.(*tg.PhoneCallDiscarded)
 			fmt.Println("PhoneCallDiscarded reason", call.Reason)
 			a.tgInputCall = nil
+      a.tgCallContext = nil
 		}
 		return nil
 	})
@@ -361,6 +287,8 @@ func (a *Application) initTgClient() error {
 	a.tgClient = mtproto
 
 	a.tgCallContext = nil
+
+	a.initCallHandlers()
 
 	return nil
 }
