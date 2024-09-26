@@ -260,7 +260,9 @@ func (a *Application) initCallHandlers() {
 			call := phoneCall.(*tg.PhoneCallDiscarded)
 			fmt.Println("PhoneCallDiscarded reason", call.Reason)
 			a.tgInputCall = nil
-      a.tgCallContext = nil
+			a.tgCallContext = nil
+		default:
+			panic(fmt.Sprintf("unexpected telegram.PhoneCall: %#v", phoneCall))
 		}
 		return nil
 	})
