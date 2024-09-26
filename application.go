@@ -281,6 +281,71 @@ func (a *Application) VideoCall(stream, username string) {
 	})
 }
 
+func (a *Application) initCallHandler() {
+	a.tgClient.AddRawHandler(&tg.UpdatePhoneCall{}, func(m tg.Update, c *tg.Client) error {
+		phoneCall := m.(*tg.UpdatePhoneCall).PhoneCall
+		switch phoneCall.(type) {
+		case *tg.PhoneCallAccepted:
+			call := phoneCall.(*tg.PhoneCallAccepted)
+			res, _ := a.ntgClient.ExchangeKeys(a.tgCallContext.user.ID, call.GB, 0)
+			a.tgInputCall = &tg.InputPhoneCall{
+				ID:         call.ID,
+				AccessHash: call.AccessHash,
+			}
+			a.ntgClient.OnSignal(func(chatId int64, signal []byte) {
+				_, _ = a.tgClient.PhoneSendSignalingData(a.tgInputCall, signal)
+			})
+			callConfirmRes, _ := a.tgClient.PhoneConfirmCall(
+				a.tgInputCall,
+				res.GAOrB,
+				res.KeyFingerprint,
+				a.tgCallContext.protocol,
+			)
+			callRes := callConfirmRes.PhoneCall.(*tg.PhoneCallObj)
+			rtcServers := make([]ntgcalls.RTCServer, len(callRes.Connections))
+			for i, connection := range callRes.Connections {
+				switch connection.(type) {
+				case *tg.PhoneConnectionWebrtc:
+					rtcServer := connection.(*tg.PhoneConnectionWebrtc)
+					rtcServers[i] = ntgcalls.RTCServer{
+						ID:       rtcServer.ID,
+						Ipv4:     rtcServer.Ip,
+						Ipv6:     rtcServer.Ipv6,
+						Username: rtcServer.Username,
+						Password: rtcServer.Password,
+						Port:     rtcServer.Port,
+						Turn:     rtcServer.Turn,
+						Stun:     rtcServer.Stun,
+					}
+				case *tg.PhoneConnectionObj:
+					phoneServer := connection.(*tg.PhoneConnectionObj)
+					rtcServers[i] = ntgcalls.RTCServer{
+						ID:      phoneServer.ID,
+						Ipv4:    phoneServer.Ip,
+						Ipv6:    phoneServer.Ipv6,
+						Port:    phoneServer.Port,
+						Turn:    true,
+						Tcp:     phoneServer.Tcp,
+						PeerTag: phoneServer.PeerTag,
+					}
+				}
+			}
+			_ = a.ntgClient.ConnectP2P(a.tgCallContext.user.ID, rtcServers, callRes.Protocol.LibraryVersions, callRes.P2PAllowed)
+		case *tg.PhoneCallDiscarded:
+			call := phoneCall.(*tg.PhoneCallDiscarded)
+			fmt.Println("PhoneCallDiscarded reason", call.Reason)
+			a.tgInputCall = nil
+		}
+		return nil
+	})
+
+	a.tgClient.AddRawHandler(&tg.UpdatePhoneCallSignalingData{}, func(m tg.Update, c *tg.Client) error {
+		signalingData := m.(*tg.UpdatePhoneCallSignalingData).Data
+		_ = a.ntgClient.SendSignalingData(a.tgCallContext.user.ID, signalingData)
+		return nil
+	})
+}
+
 func (a *Application) initTgClient() error {
 	sessionFilePath, err := a.config.GetSessionPath()
 	if err != nil {
