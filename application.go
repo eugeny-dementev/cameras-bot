@@ -360,6 +360,8 @@ func (a *Application) initTgClient() error {
 
 	a.tgClient = mtproto
 
+	a.tgCallContext = nil
+
 	return nil
 }
 
