@@ -13,6 +13,11 @@ import (
 	tg "github.com/amarnathcjd/gogram/telegram"
 )
 
+type CallContext struct {
+	protocol *tg.PhoneCallProtocol
+	user     *tg.UserObj
+}
+
 type Application struct {
 	tgClient        *tg.Client
 	tgInputCall     *tg.InputPhoneCall
