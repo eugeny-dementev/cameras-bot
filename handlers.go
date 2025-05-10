@@ -214,6 +214,11 @@ func RecordTimeCallbackFactory(timeRange string) func(c *HandlerContext) error {
 
 		// @EXAMPLE: ffmpeg -t "00:00:05" -i "rtsp://admin:password@192.168.88.111:554/ISAPI/Streaming/Channels/101" "./room.mp4"
 		cmd := exec.Command("ffmpeg")
+		if c.app.env.isDocker {
+			cmd.Args = append(cmd.Args,
+				"-rtsp_transport", "tcp",
+			)
+		}
 		cmd.Args = append(
 			cmd.Args,
 			"-t", timeArg,
