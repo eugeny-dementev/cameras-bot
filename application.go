@@ -29,6 +29,7 @@ type Application struct {
 	state           *State
 	cameras         Cameras
 	config          Config
+	env             Env
 }
 
 func (a *Application) Init() error {
@@ -37,6 +38,8 @@ func (a *Application) Init() error {
 	if err != nil {
 		return err
 	}
+
+	a.env = getEnv()
 
 	a.cameras = Cameras{}
 	err = a.cameras.Setup(a.config.Cameras)
